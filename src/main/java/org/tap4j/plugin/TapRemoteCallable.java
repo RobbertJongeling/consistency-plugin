@@ -29,7 +29,11 @@ import hudson.Util;
 import hudson.model.BuildListener;
 import hudson.remoting.VirtualChannel;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -43,6 +47,7 @@ import org.tap4j.parser.ParserException;
 import org.tap4j.parser.Tap13YamlParser;
 import org.tap4j.plugin.model.ParseErrorTestSetMap;
 import org.tap4j.plugin.model.TestSetMap;
+import org.testng.internal.thread.ThreadExecutionException;
 
 /**
  * Executes remote TAP Stream retrieval and execution.
@@ -136,6 +141,30 @@ implements FileCallable<List<TestSetMap>>
 					listener.getLogger().println("Parsing TAP test result ["+tapFile+"].");
 					
 					listener.getLogger().println();
+					
+					BufferedReader buffer = null;
+					FileReader reader = null;
+					try {
+						listener.getLogger().println("::Debug::");
+						
+						listener.getLogger().println("Opening file [" + tapFile + "] to output its content to console...");
+						reader = new FileReader(tapFile);
+						buffer = new BufferedReader(reader);
+						String line = null;
+						while((line = buffer.readLine())!=null) {
+							listener.getLogger().println(line);
+						}
+						listener.getLogger().println("\n::End Debug::!");
+					} catch( Throwable t ) {
+						t.printStackTrace(listener.getLogger());
+					} finally {
+						try {
+							if(buffer!=null) buffer.close();
+							if(reader!=null) reader.close();
+						} catch (Throwable e) {
+							e.printStackTrace(listener.getLogger());
+						}
+					}
 					
 					final TestSet testSet = new Tap13YamlParser().parseFile( tapFile );
 					
