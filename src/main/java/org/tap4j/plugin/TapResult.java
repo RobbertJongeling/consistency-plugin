@@ -117,7 +117,7 @@ public class TapResult extends AbstractTapResult {
 
     private void parse(File reportFile) {
         try {
-            final TestSet testSet = flattenTheSetAsRequired(stripSingleParentsAsRequired(parser.parseFile(tapFile)));
+            final TestSet testSet = flattenTheSetAsRequired(stripSingleParentsAsRequired(parser.parseFile(reportFile)));
 
             if (containsNotOk(testSet) || testSet.containsBailOut()) {
                 this.hasFailedTests = Boolean.TRUE;
@@ -128,7 +128,7 @@ public class TapResult extends AbstractTapResult {
 
             if (this.outputTapToConsole) {
                 try {
-                    log(FileUtils.readFileToString(tapFile));
+                    log(FileUtils.readFileToString(reportFile));
                 } catch (RuntimeException re) {
                     log(re);
                 } catch (IOException e) {
