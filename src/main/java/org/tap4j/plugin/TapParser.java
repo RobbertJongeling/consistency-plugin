@@ -25,24 +25,19 @@ package org.tap4j.plugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.FileUtils;
-import org.tap4j.model.Plan;
-import org.tap4j.model.TestResult;
-import org.tap4j.model.TestSet;
-import org.tap4j.parser.ParserException;
-import org.tap4j.parser.Tap13Parser;
-import org.tap4j.plugin.model.ParseErrorTestSetMap;
-import org.tap4j.plugin.model.TestSetMap;
-import org.tap4j.util.DirectiveValues;
-import org.tap4j.util.StatusValues;
+import org.apache.tools.ant.DirectoryScanner;
+import org.apache.tools.ant.types.FileSet;
 
+import hudson.AbortException;
 import hudson.FilePath;
+import hudson.Launcher;
+import hudson.Util;
 import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.remoting.VirtualChannel;
+import jenkins.MasterToSlaveFileCallable;
 
 /**
  * Executes remote TAP Stream retrieval and execution.
@@ -50,7 +45,7 @@ import hudson.model.Run;
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.1
  */
-public class TapParser {
+public class TapParser extends AbstractTapParser {
 
     /** Prints the logs to the web server's console / log files */
     private static final Logger log = Logger.getLogger(TapParser.class.getName());
@@ -58,8 +53,6 @@ public class TapParser {
     private final Boolean enableSubtests;
     private final Boolean todoIsFailure;
 
-    /** Build's logger to print logs as part of build's console output */
-    private final PrintStream logger;
     private final Boolean includeCommentDiagnostics;
     private final Boolean validateNumberOfTests;
     private final Boolean planRequired;
@@ -70,10 +63,16 @@ public class TapParser {
     private boolean hasFailedTests;
     private boolean parserErrors;
 
-    public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, Boolean todoIsFailure,
-            Boolean includeCommentDiagnostics, Boolean validateNumberOfTests, Boolean planRequired, Boolean verbose,
-            Boolean stripSingleParents, Boolean flattenTheTap,
-            PrintStream logger) {
+    private final Boolean failIfNoResults;
+    private final Boolean discardOldReports;
+
+    public TapParser(Boolean failIfNoResults, Boolean discardOldReports, Boolean outputTapToConsole,
+            Boolean enableSubtests, Boolean todoIsFailure, Boolean includeCommentDiagnostics,
+            Boolean validateNumberOfTests, Boolean planRequired, Boolean verbose, Boolean stripSingleParents,
+            Boolean flattenTapResult) {
+        this.failIfNoResults = failIfNoResults;
+        this.discardOldReports = discardOldReports;
+
         this.outputTapToConsole = outputTapToConsole;
         this.enableSubtests = enableSubtests;
         this.todoIsFailure = todoIsFailure;
@@ -83,211 +82,77 @@ public class TapParser {
         this.planRequired = planRequired;
         this.verbose = verbose;
         this.stripSingleParents = stripSingleParents;
-        this.flattenTheTap = flattenTheTap;
-        this.logger = logger;
+        this.flattenTheTap = flattenTapResult;
     }
 
-    public Boolean hasParserErrors() {
-        return this.parserErrors;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public TapResult parseResult(String testResultLocations, Run<?, ?> build, FilePath workspace, Launcher launcher,
+            TaskListener listener) throws IOException, InterruptedException {
+        final long buildTime = build.getTimestamp().getTimeInMillis();
+        final long timeOnMaster = System.currentTimeMillis();
+
+        return workspace
+                .act(new ParseResultCallable(this.failIfNoResults, testResultLocations, buildTime, timeOnMaster));
     }
 
-    public Boolean getOutputTapToConsole() {
-        return outputTapToConsole;
-    }
+    /**
+     * TAP parser callable, for distributed environments.
+     *
+     * @since 2.1
+     */
+    private static final class ParseResultCallable extends MasterToSlaveFileCallable<TapResult> {
 
-    public Boolean getTodoIsFailure() {
-        return todoIsFailure;
-    }
+        private static final long serialVersionUID = -8155885659619524893L;
 
-    public boolean getParserErrors() {
-        return parserErrors;
-    }
+        private final Boolean allowEmptyResults;
+        private final Boolean discardOldReports;
+        private final Boolean enableSubtests;
+        private final Boolean planRequired;
+        private Boolean outputTapToConsole;
+        private final String testResults;
+        private final long buildTime;
+        private final long nowMaster;
 
-    public boolean getStripSingleParents() {
-        return stripSingleParents;
-    }
-
-    public Boolean getIncludeCommentDiagnostics() {
-        return includeCommentDiagnostics;
-    }
-
-    public Boolean getValidateNumberOfTests() {
-        return validateNumberOfTests;
-    }
-
-    public Boolean getPlanRequired() {
-        return planRequired;
-    }
-
-    public Boolean getEnableSubtests() {
-        return enableSubtests;
-    }
-
-    public boolean hasFailedTests() {
-        return this.hasFailedTests;
-    }
-
-    public Boolean getVerbose() {
-        return verbose;
-    }
-
-    public boolean getFlattenTheTap() {
-        return flattenTheTap;
-    }
-
-    private boolean containsNotOk(TestSet testSet) {
-        for (TestResult testResult : testSet.getTestResults()) {
-            if (testResult.getStatus().equals(StatusValues.NOT_OK) && !(testResult.getDirective() != null
-                    && DirectiveValues.SKIP == testResult.getDirective().getDirectiveValue())) {
-                return true;
-            }
+        public ParseResultCallable(Boolean allowEmptyResults, Boolean discardOldReports, Boolean enableSubtests,
+                Boolean planRequired, Boolean outputTapToConsole, String testResults, long buildTime, long timeOnMaster) {
+            this.allowEmptyResults = allowEmptyResults;
+            this.discardOldReports = discardOldReports;
+            this.enableSubtests = enableSubtests;
+            this.planRequired = planRequired;
+            this.outputTapToConsole = outputTapToConsole;
+            this.testResults = testResults;
+            this.buildTime = buildTime;
+            this.nowMaster = timeOnMaster;
         }
-        return false;
-    }
 
-    public TapResult parse(FilePath[] results, Run build) {
-        this.parserErrors = Boolean.FALSE;
-        this.hasFailedTests = Boolean.FALSE;
-        final List<TestSetMap> testSets = new LinkedList<TestSetMap>();
-        if (null == results) {
-            log("File paths not specified. paths var is null. Returning empty test results.");
-        } else {
-            for (FilePath path : results) {
-                File tapFile = new File(path.getRemote());
-                if (!tapFile.isFile()) {
-                    log("'" + tapFile.getAbsolutePath() + "' points to an invalid test report");
-                    continue; // move to next file
+        @Override
+        public TapResult invoke(File ws, VirtualChannel channel) throws IOException, InterruptedException {
+            final long nowSlave = System.currentTimeMillis();
+
+            FileSet fs = Util.createFileSet(ws, testResults);
+            DirectoryScanner ds = fs.getDirectoryScanner();
+            TapResult result = null;
+
+            String[] files = ds.getIncludedFiles();
+            if (files.length > 0) {
+                result = new TapResult(buildTime + (nowSlave - nowMaster), ds, discardOldReports, enableSubtests,
+                        planRequired, outputTapToConsole);
+                result.tally();
+            } else {
+                if (this.allowEmptyResults) {
+                    result = new TapResult();
                 } else {
-                    log("Processing '" + tapFile.getAbsolutePath() + "'");
-                }
-                try {
-                    log("Parsing TAP test result [" + tapFile + "].");
-
-                    final Tap13Parser parser = new Tap13Parser("UTF-8", enableSubtests, planRequired);
-                    final TestSet testSet = flattenTheSetAsRequired(stripSingleParentsAsRequired(parser.parseFile(tapFile)));
-
-                    if (containsNotOk(testSet) || testSet.containsBailOut()) {
-                        this.hasFailedTests = Boolean.TRUE;
-                    }
-
-                    final TestSetMap map = new TestSetMap(tapFile.getAbsolutePath(), testSet);
-                    testSets.add(map);
-
-                    if (this.outputTapToConsole) {
-                        try {
-                            log(FileUtils.readFileToString(tapFile));
-                        } catch (RuntimeException re) {
-                            log(re);
-                        } catch (IOException e) {
-                            log(e);
-                        }
-                    }
-                } catch (ParserException pe) {
-                    testSets.add(new ParseErrorTestSetMap(tapFile.getAbsolutePath(), pe));
-                    this.parserErrors = Boolean.TRUE;
-                    log(pe);
-                }
-            }
-        }
-        // final TapResult testResult = new
-        // TapResult(UUID.randomUUID().toString(), build, testSets);
-        final TapResult testResult = new TapResult("TAP Test Results", build, testSets, this.todoIsFailure,
-                this.includeCommentDiagnostics, this.validateNumberOfTests);
-        return testResult;
-    }
-
-    private TestSet stripSingleParentsAsRequired(TestSet originalSet) {
-        if (!stripSingleParents) {
-            return originalSet;
-        } else {
-            TestSet result = originalSet;
-            while (hasSingleParent(result)) {
-                result = result.getTestResults().get(0).getSubtest();
-            }
-            return result;
-        }
-    }
-
-    private TestSet flattenTheSetAsRequired(TestSet originalSet) {
-        if (!flattenTheTap) {
-            return originalSet;
-        } else {
-            TestSet result = new TestSet();
-            final List<TestResult> resultsToProcess = originalSet.getTestResults();
-            int testIndex = 1;
-            while (!resultsToProcess.isEmpty()) {
-                final TestResult actualTestResult = resultsToProcess.remove(0);
-                TestSet subtests = actualTestResult.getSubtest();
-                if (subtests == null || subtests.getNumberOfTestResults() == 0) {
-                    actualTestResult.setTestNumber(testIndex++);
-                    result.addTestResult(actualTestResult);
-                } else {
-                    final List<TestResult> subtestResults = subtests.getTestResults();
-                    for (TestResult subtestResult : subtestResults) {
-                        subtestResult.setDescription(actualTestResult.getDescription() + subtestResult.getDescription());
-                        resultsToProcess.add(subtestResult);
-                    }
-
-                    final Plan subtestPlan = subtests.getPlan();
-                    final boolean planIsPresent = subtestPlan != null;
-                    final int subtestCountAsPlanned = planIsPresent ?
-                            subtestPlan.getLastTestNumber() - subtestPlan.getInitialTestNumber() + 1
-                            : -1;
-
-                    final boolean subtestCountDiffersFromPlan = planIsPresent &&  subtestCountAsPlanned != subtestResults.size();
-
-                    if (subtestCountDiffersFromPlan) {
-
-                        final int missingTestCount =
-                                subtestCountAsPlanned - subtestResults.size();
-
-                        final TestResult timeoutTestResult = new TestResult();
-                        timeoutTestResult.setStatus(StatusValues.NOT_OK);
-                        timeoutTestResult.setDescription(
-                                String.format("%s %s %d %s",
-                                        actualTestResult.getDescription(), "failed:", missingTestCount, "subtest(s) missing"));
-
-                        resultsToProcess.add(timeoutTestResult);
-                    }
+                    // no test result. Most likely a configuration
+                    // error or fatal problem
+                    throw new AbortException("No TAP files found");
                 }
             }
             return result;
         }
-    }
 
-    private boolean hasSingleParent(TestSet testSet) {
-
-        if (testSet == null) {
-            return false;
-        }
-
-        if (testSet.getNumberOfTestResults() != 1) {
-            return false; // not a single test result
-        }
-
-        int planSpan = testSet.getPlan() != null ? (testSet.getPlan().getLastTestNumber() - testSet.getPlan().getInitialTestNumber()) : 0;
-
-        if (planSpan == 0) { // exactly one test
-            return testSet.getTestResults().get(0).getSubtest() != null; // which has a child(ern)
-        } else {
-            return false;
-        }
-    }
-
-    private void log(String str) {
-        if (verbose && logger != null) {
-            logger.println(str);
-        } else {
-            log.fine(str);
-        }
-    }
-
-    private void log(Exception ex) {
-        if (logger != null) {
-            ex.printStackTrace(logger);
-        } else {
-            log.severe(ex.toString());
-        }
     }
 
 }
