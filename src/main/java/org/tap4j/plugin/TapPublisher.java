@@ -25,12 +25,17 @@ package org.tap4j.plugin;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.tap4j.model.Plan;
+import org.tap4j.model.TestSet;
+import org.tap4j.plugin.model.TestSetMap;
 
+import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -251,6 +256,107 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
     }
 
     /**
+     * Execute the plug-in code.
+     *
+     * @param build project build
+     * @param workspace project workspace
+     * @param launcher Jenkins launcher
+     * @param listener job listener
+     * @return {@code true} if the job succeeded.
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    private void performImpl(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
+            throws IOException, InterruptedException {
+        final PrintStream logger = listener.getLogger();
+        if (isPerformPublisher(build)) {
+            logger.println("TAP Reports Processing: START");
+
+            final String testResults = build.getEnvironment(listener).expand(this.testResults);
+            logger.println("Looking for TAP results report in workspace using pattern: " + testResults);
+
+            final TapResult result = parse(testResults, build, workspace, launcher, listener);
+
+            TapTestResultAction trAction = build.getAction(TapTestResultAction.class);
+            boolean appending;
+
+            if (trAction == null) {
+                appending = false;
+                trAction = new TapTestResultAction(build, result);
+            } else {
+                appending = true;
+                trAction.mergeResult(result);
+            }
+
+            if (!appending) {
+                build.addAction(trAction);
+            }
+
+            if (result.isEmpty()) {
+                if (build.getResult() == Result.FAILURE) {
+                    // most likely a build failed before it gets to the test phase.
+                    // don't report confusing error message.
+                    return;
+                }
+                if (!this.failIfNoResults) {
+                    logger.println("Test Result is empty");
+                    return;
+                }
+
+                throw new AbortException("Test Result is empty");
+            }
+
+            TapBuildAction action = build.getAction(TapBuildAction.class);
+            if (action == null) {
+                action = new TapBuildAction(build, result);
+                build.addAction(action);
+            } else {
+                appending = true;
+                action.mergeResult(result);
+            }
+
+            // create an individual report for all of the results and add it
+            // to the build
+
+            TapBuildAction action = build.getAction(TapBuildAction.class);
+            if (action == null) {
+                action = new TapBuildAction(build, result);
+                build.addAction(action);
+            } else {
+                appending = true;
+                action.mergeResult(result);
+            }
+
+            if (result.hasParseErrors()) {
+                listener.getLogger().println("TAP parse errors found in the build. Marking build as UNSTABLE");
+                build.setResult(Result.UNSTABLE);
+                return;
+            }
+            if (this.getValidateNumberOfTests()) {
+                if (!this.validateNumberOfTests(result.getTestSets())) {
+                    listener.getLogger().println(
+                            "Not all test cases were executed according to the test set plan. Marking build as UNSTABLE");
+                    build.setResult(Result.UNSTABLE);
+                }
+            }
+            if (result.getFailed() > 0) {
+                if (!this.getFailedTestsMarkBuildAsFailure()) {
+                    listener.getLogger().println("There are failed test cases. Marking build as UNSTABLE");
+                    build.setResult(Result.UNSTABLE);
+                }
+                throw new AbortException("There are failed test cases and the job is configured to mark the build as failure. Marking build as FAILURE");
+            }
+
+            if (appending) {
+                build.save();
+            }
+            logger.println("TAP Reports Processing: FINISH");
+        } else {
+            logger.println("Build result is not better or equal unstable. Skipping TAP publisher.");
+        }
+    }
+
+    /**
      * Return {@code true} if the build is ongoing, if the user did not ask to fail when failed, or otherwise if the
      * build result is not better or equal to unstable.
      *
@@ -271,102 +377,34 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         return result.isBetterOrEqualTo(Result.UNSTABLE);
     }
 
-    /**
-     * Execute the plug-in code.
-     *
-     * @param build project build
-     * @param workspace project workspace
-     * @param launcher Jenkins launcher
-     * @param listener job listener
-     * @return {@code true} if the job succeeded.
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    private boolean performImpl(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
-            throws IOException, InterruptedException {
-        final PrintStream logger = listener.getLogger();
-        if (isPerformPublisher(build)) {
-            logger.println("TAP Reports Processing: START");
-
-            final String testResults = build.getEnvironment(listener).expand(this.testResults);
-            logger.println("Looking for TAP results report in workspace using pattern: " + testResults);
-
-            final TapResult result = parse(testResults, build, workspace, launcher, listener);
-
-            TapTestResultAction trAction = build.getAction(TapTestResultAction.class);
-            boolean appending;
-
-            if (trAction == null) {
-                appending = false;
-                trAction = new TapTestResultAction(build, testResult);
-            } else {
-                appending = true;
-                trAction.mergeResult(testResult);
-            }
-
-            if (!appending) {
-                build.addAction(trAction);
-            }
-
-            if (result.getTestSets().size() > 0 || result.getParseErrorTestSets().size() > 0) {
-                // create an individual report for all of the results and add it
-                // to
-                // the build
-
-                TapBuildAction action = build.getAction(TapBuildAction.class);
-                if (action == null) {
-                    action = new TapBuildAction(build, result);
-                    build.addAction(action);
-                } else {
-                    appending = true;
-                    action.mergeResult(result);
-                }
-
-                if (result.hasParseErrors()) {
-                    listener.getLogger().println("TAP parse errors found in the build. Marking build as UNSTABLE");
-                    build.setResult(Result.UNSTABLE);
-                }
-                if (this.getValidateNumberOfTests()) {
-                    if (!this.validateNumberOfTests(result.getTestSets())) {
-                        listener.getLogger().println(
-                                "Not all test cases were executed according to the test set plan. Marking build as UNSTABLE");
-                        build.setResult(Result.UNSTABLE);
-                    }
-                }
-                if (result.getFailed() > 0) {
-                    if (this.getFailedTestsMarkBuildAsFailure()) {
-                        listener.getLogger().println(
-                                "There are failed test cases and the job is configured to mark the build as failure. Marking build as FAILURE");
-                        build.setResult(Result.FAILURE);
-                    } else {
-                        listener.getLogger().println("There are failed test cases. Marking build as UNSTABLE");
-                        build.setResult(Result.UNSTABLE);
-                    }
-                }
-
-                if (appending) {
-                    build.save();
-                }
-
-            } else {
-                logger.println("Found matching files but did not find any TAP results.");
-                return Boolean.TRUE;
-            }
-            logger.println("TAP Reports Processing: FINISH");
-        } else {
-            logger.println("Build result is not better or equal unstable. Skipping TAP publisher.");
-        }
-        return Boolean.TRUE;
-    }
-
     private TapResult parse(String testResults, Run<?, ?> build, FilePath workspace, Launcher launcher,
             TaskListener listener) throws IOException, InterruptedException {
         // TODO Auto-generated method stub
-        return new TapParser(failIfNoResults, discardOldReports,
-                outputTapToConsole, enableSubtests, todoIsFailure, includeCommentDiagnostics,
-                validateNumberOfTests, planRequired, verbose, stripSingleParents, flattenTapResult)
-                        .parseResult(testResults, build, workspace, launcher, listener);
+        return new TapParser(failIfNoResults, discardOldReports, outputTapToConsole, enableSubtests, todoIsFailure,
+                includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose, stripSingleParents,
+                flattenTapResult, listener.getLogger()).parseResult(testResults, build, workspace, launcher, listener);
     }
+
+    /**
+     * Iterates through the list of test sets and validates its plans and
+     * test results.
+     *
+     * @param testSets
+     * @return <true> if there are any test case that doesn't follow the plan
+     */
+    private boolean validateNumberOfTests(List<TestSetMap> testSets) {
+        for (TestSetMap testSetMap : testSets) {
+            TestSet testSet = testSetMap.getTestSet();
+            Plan plan = testSet.getPlan();
+            if (plan != null) {
+                int planned = plan.getLastTestNumber();
+                int numberOfTests = testSet.getTestResults().size();
+                if (planned != numberOfTests)
+                    return false;
+            }
+        }
+        return true;
+}
 
     /*
      * (non-Javadoc)

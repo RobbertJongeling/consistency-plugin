@@ -136,8 +136,8 @@ public class TapResult extends AbstractTapResult {
                 }
             }
         } catch (ParserException pe) {
-            testSets.add(new ParseErrorTestSetMap(tapFile.getAbsolutePath(), pe));
-            this.parserErrors = Boolean.TRUE;
+            testSets.add(new ParseErrorTestSetMap(reportFile.getAbsolutePath(), pe));
+            this.hasParserErrors = Boolean.TRUE;
             log(pe);
         }
     }

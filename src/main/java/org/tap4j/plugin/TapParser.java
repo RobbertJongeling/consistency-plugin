@@ -25,7 +25,7 @@ package org.tap4j.plugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Logger;
+import java.io.PrintStream;
 
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.FileSet;
@@ -47,42 +47,12 @@ import jenkins.MasterToSlaveFileCallable;
  */
 public class TapParser extends AbstractTapParser {
 
-    /** Prints the logs to the web server's console / log files */
-    private static final Logger log = Logger.getLogger(TapParser.class.getName());
-    private final Boolean outputTapToConsole;
-    private final Boolean enableSubtests;
-    private final Boolean todoIsFailure;
-
-    private final Boolean includeCommentDiagnostics;
-    private final Boolean validateNumberOfTests;
-    private final Boolean planRequired;
-    private final Boolean verbose;
-    private final Boolean stripSingleParents;
-    private final Boolean flattenTheTap;
-
-    private boolean hasFailedTests;
-    private boolean parserErrors;
-
-    private final Boolean failIfNoResults;
-    private final Boolean discardOldReports;
-
     public TapParser(Boolean failIfNoResults, Boolean discardOldReports, Boolean outputTapToConsole,
             Boolean enableSubtests, Boolean todoIsFailure, Boolean includeCommentDiagnostics,
             Boolean validateNumberOfTests, Boolean planRequired, Boolean verbose, Boolean stripSingleParents,
-            Boolean flattenTapResult) {
-        this.failIfNoResults = failIfNoResults;
-        this.discardOldReports = discardOldReports;
-
-        this.outputTapToConsole = outputTapToConsole;
-        this.enableSubtests = enableSubtests;
-        this.todoIsFailure = todoIsFailure;
-        this.parserErrors = false;
-        this.includeCommentDiagnostics = includeCommentDiagnostics;
-        this.validateNumberOfTests = validateNumberOfTests;
-        this.planRequired = planRequired;
-        this.verbose = verbose;
-        this.stripSingleParents = stripSingleParents;
-        this.flattenTheTap = flattenTapResult;
+            Boolean flattenTapResult,PrintStream logger) {
+        super(failIfNoResults, discardOldReports, outputTapToConsole, enableSubtests, todoIsFailure, includeCommentDiagnostics,
+                validateNumberOfTests, planRequired, verbose, stripSingleParents, flattenTapResult, logger);
     }
 
     /**

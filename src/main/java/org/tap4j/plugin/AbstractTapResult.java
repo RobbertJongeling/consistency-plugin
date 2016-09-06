@@ -71,7 +71,7 @@ public abstract class AbstractTapResult extends TestResult implements ModelObjec
     protected final Boolean outputTapToConsole;
 
     protected final Boolean hasFailedTests;
-    protected final Boolean parserErrors;
+    protected final Boolean hasParserErrors;
 
     public AbstractTapResult(long buildTime, DirectoryScanner results, Boolean discardOldReports,
             Boolean outputTapToConsole) {
@@ -133,7 +133,15 @@ public abstract class AbstractTapResult extends TestResult implements ModelObjec
         return (validateNumberOfTests == null) ? false : validateNumberOfTests;
     }
 
+    public Boolean isEmpty() {
+        return total == 0;
+    }
+
     // --- utility methods
+
+    public boolean hasParseErrors() {
+        return Boolean.FALSE;
+    }
 
     /**
      * Called from TapResult/index.jelly
