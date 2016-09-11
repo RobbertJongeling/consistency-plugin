@@ -50,22 +50,20 @@ public class TapParser extends AbstractTapParser {
     public TapParser(Boolean failIfNoResults, Boolean discardOldReports, Boolean outputTapToConsole,
             Boolean enableSubtests, Boolean todoIsFailure, Boolean includeCommentDiagnostics,
             Boolean validateNumberOfTests, Boolean planRequired, Boolean verbose, Boolean stripSingleParents,
-            Boolean flattenTapResult,PrintStream logger) {
-        super(failIfNoResults, discardOldReports, outputTapToConsole, enableSubtests, todoIsFailure, includeCommentDiagnostics,
-                validateNumberOfTests, planRequired, verbose, stripSingleParents, flattenTapResult, logger);
+            Boolean flattenTapResult, PrintStream logger) {
+        super(failIfNoResults, discardOldReports, outputTapToConsole, enableSubtests, todoIsFailure,
+                includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose, stripSingleParents,
+                flattenTapResult, logger);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public TapResult parseResult(String testResultLocations, Run<?, ?> build, FilePath workspace, Launcher launcher,
             TaskListener listener) throws IOException, InterruptedException {
         final long buildTime = build.getTimestamp().getTimeInMillis();
         final long timeOnMaster = System.currentTimeMillis();
 
-        return workspace
-                .act(new ParseResultCallable(this.failIfNoResults, testResultLocations, buildTime, timeOnMaster));
+        return workspace.act(new ParseResultCallable(!this.failIfNoResults, discardOldReports, enableSubtests,
+                planRequired, outputTapToConsole, testResultLocations, buildTime, timeOnMaster));
     }
 
     /**
@@ -87,7 +85,8 @@ public class TapParser extends AbstractTapParser {
         private final long nowMaster;
 
         public ParseResultCallable(Boolean allowEmptyResults, Boolean discardOldReports, Boolean enableSubtests,
-                Boolean planRequired, Boolean outputTapToConsole, String testResults, long buildTime, long timeOnMaster) {
+                Boolean planRequired, Boolean outputTapToConsole, String testResults, long buildTime,
+                long timeOnMaster) {
             this.allowEmptyResults = allowEmptyResults;
             this.discardOldReports = discardOldReports;
             this.enableSubtests = enableSubtests;

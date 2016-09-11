@@ -25,15 +25,11 @@ package org.tap4j.plugin;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.List;
 
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.tap4j.model.Plan;
-import org.tap4j.model.TestSet;
-import org.tap4j.plugin.model.TestSetMap;
 
 import hudson.AbortException;
 import hudson.Extension;
@@ -306,15 +302,6 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                 throw new AbortException("Test Result is empty");
             }
 
-            TapBuildAction action = build.getAction(TapBuildAction.class);
-            if (action == null) {
-                action = new TapBuildAction(build, result);
-                build.addAction(action);
-            } else {
-                appending = true;
-                action.mergeResult(result);
-            }
-
             // create an individual report for all of the results and add it
             // to the build
 
@@ -333,7 +320,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                 return;
             }
             if (this.getValidateNumberOfTests()) {
-                if (!this.validateNumberOfTests(result.getTestSets())) {
+                if (!result.validateNumberOfTests()) {
                     listener.getLogger().println(
                             "Not all test cases were executed according to the test set plan. Marking build as UNSTABLE");
                     build.setResult(Result.UNSTABLE);
@@ -344,7 +331,8 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                     listener.getLogger().println("There are failed test cases. Marking build as UNSTABLE");
                     build.setResult(Result.UNSTABLE);
                 }
-                throw new AbortException("There are failed test cases and the job is configured to mark the build as failure. Marking build as FAILURE");
+                throw new AbortException(
+                        "There are failed test cases and the job is configured to mark the build as failure. Marking build as FAILURE");
             }
 
             if (appending) {
@@ -379,32 +367,10 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
 
     private TapResult parse(String testResults, Run<?, ?> build, FilePath workspace, Launcher launcher,
             TaskListener listener) throws IOException, InterruptedException {
-        // TODO Auto-generated method stub
         return new TapParser(failIfNoResults, discardOldReports, outputTapToConsole, enableSubtests, todoIsFailure,
                 includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose, stripSingleParents,
                 flattenTapResult, listener.getLogger()).parseResult(testResults, build, workspace, launcher, listener);
     }
-
-    /**
-     * Iterates through the list of test sets and validates its plans and
-     * test results.
-     *
-     * @param testSets
-     * @return <true> if there are any test case that doesn't follow the plan
-     */
-    private boolean validateNumberOfTests(List<TestSetMap> testSets) {
-        for (TestSetMap testSetMap : testSets) {
-            TestSet testSet = testSetMap.getTestSet();
-            Plan plan = testSet.getPlan();
-            if (plan != null) {
-                int planned = plan.getLastTestNumber();
-                int numberOfTests = testSet.getTestResults().size();
-                if (planned != numberOfTests)
-                    return false;
-            }
-        }
-        return true;
-}
 
     /*
      * (non-Javadoc)

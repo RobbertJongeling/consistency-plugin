@@ -23,6 +23,8 @@
  */
 package org.tap4j.plugin;
 
+import static hudson.tasks.test.TestObject.LOGGER;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -40,9 +42,7 @@ import org.tap4j.model.Comment;
 import org.tap4j.model.Directive;
 import org.tap4j.model.Plan;
 import org.tap4j.model.TestSet;
-import org.tap4j.plugin.model.ParseErrorTestSetMap;
 import org.tap4j.plugin.model.TapAttachment;
-import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.Constants;
 import org.tap4j.plugin.util.DiagnosticUtil;
 import org.tap4j.util.DirectiveValues;
@@ -71,7 +71,11 @@ public abstract class AbstractTapResult extends TestResult implements ModelObjec
     protected final Boolean outputTapToConsole;
 
     protected final Boolean hasFailedTests;
-    protected final Boolean hasParserErrors;
+    protected volatile Boolean hasParserErrors = Boolean.FALSE;
+
+    public AbstractTapResult() {
+
+    }
 
     public AbstractTapResult(long buildTime, DirectoryScanner results, Boolean discardOldReports,
             Boolean outputTapToConsole) {
@@ -103,10 +107,12 @@ public abstract class AbstractTapResult extends TestResult implements ModelObjec
         return this.total;
     }
 
+    @Override
     public float getDuration() {
         return this.duration;
     }
 
+    @Override
     @Exported(visibility = 999)
     public String getName() {
         return name;

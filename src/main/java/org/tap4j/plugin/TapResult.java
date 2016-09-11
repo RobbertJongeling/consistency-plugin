@@ -33,14 +33,15 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.tap4j.model.Plan;
-import org.tap4j.model.TestSet;
 import org.tap4j.parser.ParserException;
 import org.tap4j.parser.Tap13Parser;
-import org.tap4j.plugin.model.ParseErrorTestSetMap;
-import org.tap4j.plugin.model.TestSetMap;
+import org.tap4j.plugin.model.CaseResult;
+import org.tap4j.plugin.model.SuiteResult;
 
 import hudson.AbortException;
 import hudson.Util;
+import hudson.tasks.test.TestObject;
+import hudson.tasks.test.TestResult;
 
 /**
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
@@ -60,14 +61,18 @@ public class TapResult extends AbstractTapResult {
      */
     private static final String DURATION_KEY = "duration_ms";
     /**
-     * TAP Test Sets. At least one per file.
+     * Test suite.
      */
-    private final List<TestSet> testSets = new ArrayList<TestSet>();
+    private final List<SuiteResult> suites = new ArrayList<SuiteResult>();
 
-    private final Tap13Parser parser;
+    private transient Tap13Parser parser;
+
+    public TapResult() {
+        super();
+    }
 
     public TapResult(long buildTime, DirectoryScanner results, Boolean discardOldReports, Boolean enableSubtests,
-            Boolean planRequired, Boolean outputTapToConsole) {
+            Boolean planRequired, Boolean outputTapToConsole) throws IOException {
         super(buildTime, results, discardOldReports, outputTapToConsole);
         parser = new Tap13Parser("UTF-8", enableSubtests, planRequired);
         parse(buildTime, results);
@@ -101,8 +106,11 @@ public class TapResult extends AbstractTapResult {
                         + "Please keep the slave clock in sync with the master.");
 
             File f = new File(baseDir, reportFiles[0]);
-            throw new AbortException(String.format("Test reports were found but none of them are new. Did tests run? %n"
-                    + "For example, %s is %s old%n", f, Util.getTimeSpanString(buildTime - f.lastModified())));
+            throw new AbortException(
+                    String.format(
+                            "Test reports were found but none of them are new. Did tests run? %n"
+                                    + "For example, %s is %s old%n",
+                            f, Util.getTimeSpanString(buildTime - f.lastModified())));
         }
     }
 
@@ -117,14 +125,12 @@ public class TapResult extends AbstractTapResult {
 
     private void parse(File reportFile) {
         try {
-            final TestSet testSet = flattenTheSetAsRequired(stripSingleParentsAsRequired(parser.parseFile(reportFile)));
+            final SuiteResult suite = flattenTheSetAsRequired(stripSingleParentsAsRequired(parser.parseFile(reportFile)));
 
             if (containsNotOk(testSet) || testSet.containsBailOut()) {
                 this.hasFailedTests = Boolean.TRUE;
             }
 
-            final TestSetMap map = new TestSetMap(reportFile.getAbsolutePath(), testSet);
-            testSets.add(map);
 
             if (this.outputTapToConsole) {
                 try {
@@ -136,12 +142,20 @@ public class TapResult extends AbstractTapResult {
                 }
             }
         } catch (ParserException pe) {
-            testSets.add(new ParseErrorTestSetMap(reportFile.getAbsolutePath(), pe));
+            SuiteResult sr = new SuiteResult(reportFile);
+            sr.addCase(new CaseResult(sr, 0, "[empty]", String.format("Error parsing the TAP file %s", reportFile), todoIsFailure));
+            add(sr);
             this.hasParserErrors = Boolean.TRUE;
             log(pe);
         }
     }
 
+    private void add(SuiteResult sr) {
+        this.suites.add(sr);
+        this.duration += sr.getDuration();
+    }
+
+    @Override
     public void tally() {
         failed = 0;
         passed = 0;
@@ -150,30 +164,29 @@ public class TapResult extends AbstractTapResult {
         total = 0;
         duration = 0.0f;
 
-        for (TestSetMap testSet : testSets) {
-            TestSet realTestSet = testSet.getTestSet();
-            List<org.tap4j.model.TestResult> testResults = realTestSet.getTestResults();
+        for (SuiteResult suite : suites) {
+            final List<CaseResult> cases = suite.getCases();
 
-            total += testResults.size();
+            total += cases.size();
 
-            Plan plan = realTestSet.getPlan();
+            Plan plan = suite.getPlan();
 
             if (plan != null && plan.isSkip()) {
-                this.skipped += testResults.size();
+                this.skipped += cases.size();
             } else {
-                for (org.tap4j.model.TestResult testResult : testResults) {
-                    if (isSkipped(testResult)) {
+                for (CaseResult caseResult : cases) {
+                    if (caseResult.isSkipped()) {
                         skipped += 1;
-                    } else if (isFailure(testResult, todoIsFailure)) {
+                    } else if (caseResult.isFailure()) {
                         failed += 1;
                     } else {
                         passed += 1;
                     }
                     // FIXME: code duplication. Refactor it and
                     // TapTestResultResult
-                    Map<String, Object> diagnostic = testResult.getDiagnostic();
-                    if (diagnostic != null && !diagnostic.isEmpty()) {
-                        Object duration = diagnostic.get(DURATION_KEY);
+                    Map<String, Object> diagnostics = caseResult.getDiagnostics();
+                    if (diagnostics != null && !diagnostics.isEmpty()) {
+                        Object duration = diagnostics.get(DURATION_KEY);
                         if (duration != null) {
                             Float durationMS = Float.parseFloat(duration.toString());
                             this.duration += durationMS;
@@ -182,8 +195,42 @@ public class TapResult extends AbstractTapResult {
                 }
             }
 
-            this.bailOuts += realTestSet.getNumberOfBailOuts();
+            this.bailOuts += suite.countOfBailOuts();
         }
+    }
+
+    @Override
+    public TestResult findCorrespondingResult(String arg0) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public TestObject getParent() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * Iterates through the list of test sets and validates its plans and test results.
+     *
+     * @param testSets
+     * @return <true> if there are any test case that doesn't follow the plan
+     */
+    public boolean validateNumberOfTests() {
+        boolean valid = true;
+        for (SuiteResult suite : suites) {
+            Plan plan = suite.getPlan();
+            if (plan != null) {
+                int planned = plan.getLastTestNumber();
+                int numberOfTests = suite.getCases().size();
+                if (planned != numberOfTests) {
+                    valid = false;
+                    break;
+                }
+            }
+        }
+        return valid;
     }
 
 }

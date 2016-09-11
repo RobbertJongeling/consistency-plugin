@@ -2,17 +2,17 @@
  * The MIT License
  *
  * Copyright (c) 2012 Bruno P. Kinoshita
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,23 +23,6 @@
  */
 package org.tap4j.plugin.model;
 
-import hudson.Functions;
-import hudson.model.AbstractBuild;
-import hudson.model.Item;
-import hudson.tasks.test.AbstractTestResultAction;
-import hudson.tasks.test.TestObject;
-import hudson.tasks.test.TestResult;
-import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.Stapler;
-import org.kohsuke.stapler.StaplerRequest;
-import org.tap4j.model.Comment;
-import org.tap4j.model.Directive;
-import org.tap4j.model.TestSet;
-import org.tap4j.plugin.TapResult;
-import org.tap4j.plugin.util.Util;
-import org.tap4j.util.DirectiveValues;
-
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -48,26 +31,43 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.Stapler;
+import org.kohsuke.stapler.StaplerRequest;
+import org.tap4j.model.Comment;
+import org.tap4j.model.Directive;
+import org.tap4j.model.TestSet;
+import org.tap4j.plugin.TapResult;
+import org.tap4j.util.DirectiveValues;
+
+import hudson.Functions;
+import hudson.model.AbstractBuild;
+import hudson.model.Item;
+import hudson.tasks.test.AbstractTestResultAction;
+import hudson.tasks.test.TestObject;
+import hudson.tasks.test.TestResult;
+import jenkins.model.Jenkins;
+
 /**
- * 
+ *
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 0.1
  */
 public class TapTestResultResult extends TestResult {
 
     private static final String DURATION_KEY = "duration_ms";
-    
+
     private static final long serialVersionUID = -4499261655602135921L;
     private static final Logger LOGGER = Logger.getLogger(TapTestResultResult.class.getName());
-    
+
     private final AbstractBuild<?, ?> owner;
     private final org.tap4j.model.TestResult tapTestResult;
     private final TestSetMap testSetMap;
     private final Boolean todoIsFailure;
     private final Boolean includeCommentDiagnostics;
     private final Boolean validateNumberOfTests;
-    
-    public TapTestResultResult(AbstractBuild<?, ?> owner, TestSetMap testSetMap, org.tap4j.model.TestResult tapTestResult, 
+
+    public TapTestResultResult(AbstractBuild<?, ?> owner, TestSetMap testSetMap, org.tap4j.model.TestResult tapTestResult,
             Boolean todoIsFailure, Boolean includeCommentDiagnostics, Boolean validateNumberOfTests) {
         this.owner = owner;
         this.testSetMap = testSetMap;
@@ -76,10 +76,11 @@ public class TapTestResultResult extends TestResult {
         this.includeCommentDiagnostics = includeCommentDiagnostics;
         this.validateNumberOfTests = validateNumberOfTests;
     }
-    
+
     /* (non-Javadoc)
      * @see hudson.model.ModelObject#getDisplayName()
      */
+    @Override
     public String getDisplayName() {
         return getName();
     }
@@ -120,7 +121,7 @@ public class TapTestResultResult extends TestResult {
         }
         return null;
     }
-    
+
     /* (non-Javadoc)
      * @see hudson.tasks.test.TestObject#getName()
      */
@@ -135,17 +136,17 @@ public class TapTestResultResult extends TestResult {
         }
         return buf.toString();
     }
-    
+
     public String getStatus() {
-        boolean failure = Util.isFailure(this.tapTestResult, todoIsFailure);
+        boolean failure = isFailure(this.tapTestResult, todoIsFailure);
         return failure ? "NOT OK" : "OK";
     }
-    
+
     public String getSkip() {
-        boolean skip = Util.isSkipped(this.tapTestResult);
+        boolean skip = isSkipped(this.tapTestResult);
         return skip ? "Yes" : "No";
     }
-    
+
     public String getTodo() {
         String todo = "No";
         // TODO: not consistent with the other methods in TapResult
@@ -157,11 +158,13 @@ public class TapTestResultResult extends TestResult {
         }
         return todo;
     }
-    
+
+    @Override
     public String getFullName() {
         return getName();
     }
-    
+
+    @Override
     public String getRelativePathFrom(TestObject it) {
         // if (it is one of my ancestors) {
         //    return a relative path from it
@@ -174,7 +177,7 @@ public class TapTestResultResult extends TestResult {
 
         StringBuilder buf = new StringBuilder();
         TestObject next = this;
-        TestObject cur = this;  
+        TestObject cur = this;
         // Walk up my ancesotors from leaf to root, looking for "it"
         // and accumulating a relative url as I go
         while (next!=null && it!=next) {
@@ -206,7 +209,7 @@ public class TapTestResultResult extends TestResult {
             AbstractBuild<?,?> myBuild = cur.getOwner();
             if (myBuild ==null) {
                 //LOGGER.warning("trying to get relative path, but we can't determine the build that owns this result.");
-                return ""; // this won't take us to the right place, but it also won't 404. 
+                return ""; // this won't take us to the right place, but it also won't 404.
             }
             //buf.insert(0,'/');
             buf.insert(0,myBuild.getUrl());
@@ -223,7 +226,7 @@ public class TapTestResultResult extends TestResult {
                 //LOGGER.info("trying to get relative path, but it is not my ancestor, and we're not in a stapler request. Trying absolute hudson url...");
                 String hudsonRootUrl = Jenkins.getInstance().getRootUrl();
                 if (hudsonRootUrl==null||hudsonRootUrl.length()==0) {
-                    //LOGGER.warning("Can't find anything like a decent hudson url. Punting, returning empty string."); 
+                    //LOGGER.warning("Can't find anything like a decent hudson url. Punting, returning empty string.");
                     return "";
 
                 }
@@ -231,12 +234,12 @@ public class TapTestResultResult extends TestResult {
                 buf.insert(0, hudsonRootUrl);
             }
 
-            //LOGGER.info("Here's our relative path: " + buf.toString()); 
-            return buf.toString(); 
+            //LOGGER.info("Here's our relative path: " + buf.toString());
+            return buf.toString();
         }
 
     }
-    
+
     /* (non-Javadoc)
      * @see hudson.tasks.test.TestObject#getSafeName()
      */
@@ -250,14 +253,16 @@ public class TapTestResultResult extends TestResult {
         }
         return safeName;
     }
-    
+
     /* (non-Javadoc)
      * @see hudson.tasks.test.TestResult#getTitle()
      */
+    @Override
     public String getTitle() {
         return getName();
     }
-    
+
+    @Override
     public float getDuration() {
         Map<String, Object> diagnostic = this.tapTestResult.getDiagnostic();
         // FIXME: code duplication. Refactor it and TapResult
@@ -270,7 +275,7 @@ public class TapTestResultResult extends TestResult {
         }
         return super.getDuration();
     }
-    
+
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
