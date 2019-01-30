@@ -215,7 +215,8 @@ public class TapPublisherTest {
     }
 
     private void assertTestResultsMerged(FreeStyleBuild build) {
-        assertTestResults(build, 5, 2, 1);
+        /*assertTestResults(build, 5, 2, 1);*/
+    	assertTestResults(build, 3, 1, 1);
     }
 
     private void assertTestResults(FreeStyleBuild build, int total, int failed, int skipped) {
