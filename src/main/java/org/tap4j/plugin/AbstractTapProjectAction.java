@@ -49,14 +49,14 @@ public class AbstractTapProjectAction implements Action {
         this((Job) project);
     }
 
-    public static final String URL_NAME = "tapResults";
+    public static final String URL_NAME = "consistencyChecks";
     public static final String ICON_NAME = "/plugin/tap/icons/tap-24.png";
     
     /* (non-Javadoc)
      * @see hudson.model.Action#getDisplayName()
      */
     public String getDisplayName() {
-        return "TAP Extended Test Results";
+        return "Consistency Checks";
     }
 
     /* (non-Javadoc)

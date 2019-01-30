@@ -25,12 +25,11 @@
 		<version>3.2</version>
 	</parent>
 
-	<inceptionYear>2011</inceptionYear>
+	<inceptionYear>2019</inceptionYear>
 
-	<groupId>org.tap4j</groupId>
-	<artifactId>tap</artifactId>
-	<name>Jenkins TAP Plugin</name>
-	<version>2.2.2-SNAPSHOT</version>
+	<artifactId>consistency</artifactId>
+	<name>Jenkins Consistency Checking Plugin</name>
+	<version>0.1</version>
 	<packaging>hpi</packaging>
 
 	<licenses>
@@ -40,14 +39,7 @@
 		</license>
 	</licenses>
 
-	<description>This plugin publishes TAP test results.</description>
-
-	<url>http://wiki.jenkins-ci.org/display/JENKINS/TAP+Plugin</url>
-
-	<organization>
-		<name>Jenkins</name>
-		<url>http://www.jenkins-ci.org</url>
-	</organization>
+	<description>This plugin allows users to manage lightweight inter-model consistency checks.</description>
 
 	<properties>
 		<jenkins.version>1.642.3</jenkins.version>
@@ -59,10 +51,6 @@
 		<findbugs.failOnError>false</findbugs.failOnError>
 	</properties>
 
-	<issueManagement>
-		<system>JIRA</system>
-		<url>https://issues.jenkins-ci.org/browse/JENKINS/component/15874</url>
-	</issueManagement>
 
 	<distributionManagement>
 		<repository>
@@ -74,10 +62,10 @@
 
 	<developers>
 		<developer>
-			<id>kinow</id>
-			<name>Bruno P. Kinoshita</name>
-			<email>brunodepaulak@yahoo.com.br</email>
-			<timezone>-3</timezone>
+			<id>robbertjongeling</id>
+			<name>Robbert Jongeling</name>
+			<email>robbert.jongeling@mdh.se</email>
+			<timezone>+1</timezone>
 			<roles>
 				<role>Developer</role>
 			</roles>
@@ -85,9 +73,9 @@
 	</developers>
 
 	<scm>
-		<connection>scm:git:git://github.com/jenkinsci/tap-plugin.git</connection>
-		<developerConnection>scm:git:git@github.com:jenkinsci/tap-plugin.git</developerConnection>
-		<url>http://github.com/jenkinsci/tap-plugin</url>
+		<connection>scm:git:git://github.com/robbertjongeling/consistency-plugin.git</connection>
+		<developerConnection>scm:git:git@github.com:robbertjongeling/consistency-plugin.git</developerConnection>
+		<url>http://github.com/robbertjongeling/consistency-plugin</url>
 		<tag>HEAD</tag>
 	</scm>
 
@@ -223,4 +211,5 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+	<groupId>org.robbert</groupId>
 </project>

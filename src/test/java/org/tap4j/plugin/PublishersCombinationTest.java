@@ -92,10 +92,10 @@ public class PublishersCombinationTest {
 
     private void assertTapPart(HtmlPage page, int buildNumber) {
 
-        //      there should be a TAP result trend graph
-        rule.assertXPath(page, "//img[@src='tapResults/graph']");
+        //      there should be a Consistency Checks result trend graph
+        rule.assertXPath(page, "//img[@src='consistencyChecks/graph']");
 
         //      superficially assert that the number of tests was correct
-        rule.assertXPath(page, String.format("//area[@title='1 Skip(s)' and @href='%s/tapResults/']", buildNumber));
+        rule.assertXPath(page, String.format("//area[@title='1 Skip(s)' and @href='%s/consistencyChecks/']", buildNumber));
     }
 }

@@ -27,12 +27,12 @@ public class GraphHelperTest {
         HtmlPage page = wc.getPage(project);
 
         //      there should be a TAP result trend graph
-        rule.assertXPath(page, "//img[@src='tapResults/graph']");
+        rule.assertXPath(page, "//img[@src='consistencyChecks/graph']");
 
         //      check that tooltip is rendered for the last build
-        rule.assertXPath(page, "//area[@title='1 Failure(s)' and @href='16/tapResults/']");
+        rule.assertXPath(page, "//area[@title='1 Failure(s)' and @href='16/consistencyChecks/']");
 
         //      check that build without TAP action recorded is excluded from graph
-        assertTrue(page.getByXPath("//area[@href='7/tapResults/']").isEmpty());
+        assertTrue(page.getByXPath("//area[@href='7/consistencyChecks/']").isEmpty());
     }
 }
