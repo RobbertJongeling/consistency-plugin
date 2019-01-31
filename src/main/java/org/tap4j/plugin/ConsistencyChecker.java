@@ -142,6 +142,15 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
         performImpl(run, workspace, listener);
     }
 
+    /**
+     * This is the method that is executed in the post-build action "Run Consistency Checks"
+     * @param build
+     * @param workspace
+     * @param listener
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
     private boolean performImpl(Run<?, ?> build, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
         final PrintStream logger = listener.getLogger();
         if (isPerformChecker(build)) {

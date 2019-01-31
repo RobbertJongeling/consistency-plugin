@@ -7,7 +7,17 @@
         <l:main-panel>
              <h1>${%header}</h1>
              <h2>${%description}</h2>
-	     <p>${%content}</p>                                   
+		     <p>
+	            <a href="addChecks">Add Consistency Checks!</a>
+	        </p>              
+	        <j:if test="${it.configFile.exists()}">
+            <p>
+                Current configuration:
+            </p>
+            <pre>
+                ${it.configFile.asString()}
+            </pre>
+        </j:if>                    
         </l:main-panel>
     </l:layout>
 </j:jelly>
