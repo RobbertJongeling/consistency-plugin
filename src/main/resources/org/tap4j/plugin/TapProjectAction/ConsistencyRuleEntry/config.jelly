@@ -27,4 +27,7 @@ THE SOFTWARE.
     <f:entry field="B" title="B">
         <f:textbox/>
     </f:entry>
+    <f:entry field="strictness" title="Strictness">
+          <f:select />
+    </f:entry>
 </j:jelly>

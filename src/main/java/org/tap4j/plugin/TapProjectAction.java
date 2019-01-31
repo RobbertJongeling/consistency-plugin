@@ -469,13 +469,13 @@ public class TapProjectAction implements Action, Describable<TapProjectAction>  
 		}
 
 		@Extension
-		public static class DescriptorImpl extends Descriptor<Entry> {
+		public static final class DescriptorImpl extends Descriptor<Entry> {
 			@Override
 			public String getDisplayName() {
 				return "Consistency Check";
 			}
 
-			public ListBoxModel doFillChoiceItems() {
+			public ListBoxModel doFillStrictnessItems() {
 				return new ListBoxModel().add("strict").add("medium").add("loose");
 			}
 		}
