@@ -99,15 +99,16 @@ public class TapTestResultResult extends TestResult {
      */
     @Override
     public TestObject getParent() {
-        TapStreamResult parent = null;
-        TestSet testSet = this.tapTestResult.getSubtest();
-        if(testSet != null) {
-            TestSetMap subTest = new TestSetMap(testSetMap.getFileName(), testSet);
-            List<TestSetMap> list = new ArrayList<TestSetMap>();
-            list.add(subTest);
-            parent = new TapStreamResult(owner, new TapResult("TAP Test Results", owner, list, todoIsFailure, includeCommentDiagnostics, validateNumberOfTests));
-        }
-        return parent;
+//        TapStreamResult parent = null;
+//        TestSet testSet = this.tapTestResult.getSubtest();
+//        if(testSet != null) {
+//            TestSetMap subTest = new TestSetMap(testSetMap.getFileName(), testSet);
+//            List<TestSetMap> list = new ArrayList<TestSetMap>();
+//            list.add(subTest);
+//            parent = new TapStreamResult(owner, new TapResult("TAP Test Results", owner, list, todoIsFailure, includeCommentDiagnostics, validateNumberOfTests));
+//        }
+//        return parent;
+    	return null;
     }
 
     /* (non-Javadoc)
@@ -193,13 +194,13 @@ public class TapTestResultResult extends TestResult {
             // Keep adding on to the string we've built so far
 
             // Start with the test result action
-            TapTestResultAction action = getTestResultActionDiverged();
-            if (action==null) {
-                //LOGGER.warning("trying to get relative path, but we can't determine the action that owns this result.");
-                return ""; // this won't take us to the right place, but it also won't 404.
-            }
-            buf.insert(0,'/');
-            buf.insert(0,action.getUrlName());
+//            TapTestResultAction action = getTestResultActionDiverged();
+//            if (action==null) {
+//                //LOGGER.warning("trying to get relative path, but we can't determine the action that owns this result.");
+//                return ""; // this won't take us to the right place, but it also won't 404.
+//            }
+//            buf.insert(0,'/');
+//            buf.insert(0,action.getUrlName());
 
             // Now the build
             AbstractBuild<?,?> myBuild = cur.getOwner();
@@ -305,20 +306,20 @@ public class TapTestResultResult extends TestResult {
         return pw.toString();
     }
 
-    /**
-     * This is mostly a verbatim from {@link TestObject#getTestResultAction()}, with the only difference in a return
-     * type.
-     *
-     * @return associated TAP test result action object
-     */
-    @CheckForNull
-    private TapTestResultAction getTestResultActionDiverged() {
-        Run<?, ?> owner = getRun();
-        if (owner != null) {
-            return owner.getAction(TapTestResultAction.class);
-        } else {
-            LOGGER.warning("owner is null when trying to getTestResultActionDiverged.");
-            return null;
-        }
-    }
+//    /**
+//     * This is mostly a verbatim from {@link TestObject#getTestResultAction()}, with the only difference in a return
+//     * type.
+//     *
+//     * @return associated TAP test result action object
+//     */
+//    @CheckForNull
+//    private TapTestResultAction getTestResultActionDiverged() {
+//        Run<?, ?> owner = getRun();
+//        if (owner != null) {
+//            return owner.getAction(TapTestResultAction.class);
+//        } else {
+//            LOGGER.warning("owner is null when trying to getTestResultActionDiverged.");
+//            return null;
+//        }
+//    }
 }

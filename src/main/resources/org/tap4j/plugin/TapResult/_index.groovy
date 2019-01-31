@@ -9,10 +9,10 @@ f = namespace("/lib/form")
 d = namespace("jelly:define")
 
 
-l.layout(norefresh: "true", css: "/plugin/tap/css/tap.css") {
+l.layout(norefresh: "true", css: "/plugin/consistency/css/consistency.css") {
   st.include(it: it.owner, page: "sidepanel.jelly") 
   l.main-panel() {
-    h1("TAP Test Results") 
+    h1("Consistency Checks Results") 
     if(it.isEmptyTestSet()) 
     else{
       table(width: "100%") {
@@ -44,7 +44,7 @@ l.layout(norefresh: "true", css: "/plugin/tap/css/tap.css") {
             th("Directive") 
           }
           map.testSet.tapLines.each() { tapLine -> 
-            tap.line(tapFile: map.fileName, tapLine: tapLine) 
+            tap.line(tapFile: map.fileName, tapLine: tapLine, "hello") 
           }
         }
         br() 

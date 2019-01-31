@@ -5,6 +5,6 @@
          ${from.graphName}
       </div>
       <j:set var="relativeUrlPath" value="${from.urlName}/"/>
-      <img src="${relativeUrlPath}graph" lazymap="${relativeUrlPath}graphMap" alt="[Test result trend chart]"/>
+      <img src="${relativeUrlPath}graph" lazymap="${relativeUrlPath}graphMap" alt="[Consistency Check result trend chart]"/>
    </j:if>
 </j:jelly>

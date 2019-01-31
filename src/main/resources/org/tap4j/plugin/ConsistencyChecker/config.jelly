@@ -1,0 +1,11 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <f:entry title="Failed checks mark build as failure">
+      <f:checkbox name="ConsistencyChecker.failIfChecksFail" value="${instance.failIfChecksFail}" checked="${instance.failIfChecksFail}" default="false"/>
+  </f:entry>
+  <f:advanced>      
+	  <f:entry title="Show only failures">
+	      <f:checkbox name="ConsistencyChecker.showOnlyFailures" value="${instance.showOnlyFailures}" checked="${instance.showOnlyFailures}" default="false" />
+	  </f:entry>
+  </f:advanced>
+</j:jelly>

@@ -1,4 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
-  This plugin publishes TAP test results.
+  This plugin allows for the management of lightweight inter-model consistency checks.
 </div>

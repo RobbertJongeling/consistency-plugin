@@ -8,11 +8,11 @@
 	xmlns:f="/lib/form" 
 	xmlns:i="jelly:fmt" 
 	xmlns:tap="/org/tap4j/plugin/tags">
-	<l:layout norefresh="true" css="/plugin/tap/css/tap.css">
+	<l:layout norefresh="true" css="/plugin/consistency/css/consistency.css">
 		<st:include it="${it.owner}" page="sidepanel.jelly" />
 		<l:main-panel>
 			
-			<h1>TAP Extended Test Results</h1>
+			<h1>Consistency Checks Results</h1>
 			
 			<j:choose>
 				<j:when test="${it.isEmptyTestSet()}">

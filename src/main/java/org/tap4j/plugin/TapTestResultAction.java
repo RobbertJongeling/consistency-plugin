@@ -37,7 +37,7 @@ import jenkins.tasks.SimpleBuildStep;
 import org.jvnet.localizer.Localizable;
 import org.kohsuke.stapler.StaplerProxy;
 import org.kohsuke.stapler.export.Exported;
-import org.tap4j.plugin.model.TapStreamResult;
+//import org.tap4j.plugin.model.TapStreamResult;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -121,12 +121,13 @@ public class TapTestResultAction
      * @see org.kohsuke.stapler.StaplerProxy#getTarget()
      */
     public Object getTarget() {
-        return getResult();
+//        return getResult();
+    	return null;
     }
     
-    public TapStreamResult getResult() {
-        return new TapStreamResult(owner, tapResult);
-    }
+//    public TapStreamResult getResult() {
+//        return new TapStreamResult(owner, tapResult);
+//    }
 
     /* (non-Javadoc)
      * @see hudson.tasks.test.AbstractTestResultAction#getUrlName()
@@ -134,13 +135,15 @@ public class TapTestResultAction
     @Override
     @Exported(visibility = 2)
     public String getUrlName() {
-        return "tapTestReport";
+        //return "tapTestReport";
+    	return ""; //test breaking things
     }
 
 
     @Override
     public String getIconFileName() {
-        return "clipboard.png";
+        //return "clipboard.png";
+    	return ""; //test breaking things
     }
 
     /* (non-Javadoc)
@@ -148,7 +151,8 @@ public class TapTestResultAction
          */
     @Override
     public String getDisplayName() {
-        return "TAP Test Results";
+        //return "TAP Test Results";
+        return ""; //test breaking things
     }
     
     /*
@@ -196,13 +200,13 @@ public class TapTestResultAction
         this.owner = r instanceof AbstractBuild ? (AbstractBuild<?,?>) r : null;
     }
 
-    void mergeResult(TapResult additionalResult) {
-        TapStreamResult original = getResult();
-        original.merge(additionalResult);
-        setFromTapStreamResult(original);
-    }
-
-    private void setFromTapStreamResult(TapStreamResult result) {
-        this.tapResult = result.getTapResult();
-    }
+//    void mergeResult(TapResult additionalResult) {
+//        TapStreamResult original = getResult();
+//        original.merge(additionalResult);
+//        setFromTapStreamResult(original);
+//    }
+//
+//    private void setFromTapStreamResult(TapStreamResult result) {
+//        this.tapResult = result.getTapResult();
+//    }
 }

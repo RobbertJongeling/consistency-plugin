@@ -50,7 +50,7 @@ public class AbstractTapProjectAction implements Action {
     }
 
     public static final String URL_NAME = "consistencyChecks";
-    public static final String ICON_NAME = "/plugin/tap/icons/tap-24.png";
+    public static final String ICON_NAME = "/plugin/consistency/icons/tap-24.png";
     
     /* (non-Javadoc)
      * @see hudson.model.Action#getDisplayName()

@@ -5,8 +5,8 @@
     xmlns:t="/lib/hudson"
 	xmlns:f="/lib/form"
     xmlns:i="jelly:fmt">
-    <t:summary icon="/plugin/tap/icons/tap-48.png">
-        <p><a href="consistencyChecks">Consistency Checks Extended Results and Management</a></p>
+    <t:summary icon="/plugin/consistency/icons/tap-48.png">
+        <p><a href="consistencyChecks">Consistency Checks</a></p>
 		<p>This build contains ${it.result.testSets.size()} Consistency Checks set(s), and <a href='${rootURL}/consistencyChecks/#parseErrors'>${it.result.parseErrorTestSets.size()} parse error(s)</a>.</p>
 	</t:summary>
 </j:jelly>
