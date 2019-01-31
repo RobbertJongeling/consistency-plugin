@@ -55,10 +55,12 @@ import org.tap4j.plugin.util.GraphHelper;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -398,6 +400,18 @@ public class TapProjectAction implements Action, Describable<TapProjectAction>  
 
 	public XmlFile getConfigFile() {
 		return new XmlFile(new File(Jenkins.getInstance().getRootDir(), "stuff.xml"));// TODO stuff.xml?????
+	}
+	
+	public List<String> getConsistencyChecks() {
+		List<String> toReturn = new LinkedList<String>();
+		for(Entry e : config.entries) {
+			if(e instanceof ConsistencyRuleEntry) {
+				ConsistencyRuleEntry cre = ((ConsistencyRuleEntry)e);
+				toReturn.add(cre.A + " " + cre.strictness + " consistent with " + cre.B);
+			}
+		}
+		//return Arrays.asList(new String[]{"A", "B", "C"});
+		return toReturn;
 	}
 
 	private Config config;

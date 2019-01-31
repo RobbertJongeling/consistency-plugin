@@ -14,9 +14,12 @@
             <p>
                 Current configuration:
             </p>
-            <pre>
-                ${it.configFile.asString()}
-            </pre>
+            <p>
+	            <j:forEach items="${it.consistencyChecks}" var="i">
+	             <li>${i}</li>
+	           </j:forEach>
+            </p>
+            
         </j:if>                    
         </l:main-panel>
     </l:layout>
