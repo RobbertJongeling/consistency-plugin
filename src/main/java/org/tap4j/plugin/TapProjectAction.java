@@ -48,8 +48,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
-import org.tap4j.plugin.ConsistencyRuleList.Config;
-import org.tap4j.plugin.ConsistencyRuleList.Entry;
 import org.tap4j.plugin.util.GraphHelper;
 
 import java.io.File;
@@ -72,10 +70,10 @@ import javax.servlet.ServletException;
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
-public class TapProjectAction implements Action, Describable<TapProjectAction>  { //extends AbstractTapProjectAction {
+public class TapProjectAction implements Action, Describable<TapProjectAction> { // extends AbstractTapProjectAction {
 
-	public final Job<?,?> job;
-	
+	public final Job<?, ?> job;
+
 	protected class Result {
 		public int numPassed;
 		public int numFailed;
@@ -107,7 +105,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction>  
 	public TapProjectAction(Job<?, ?> job) {
 		this.job = job;
 	}
-	
+
 	protected Class<TapBuildAction> getBuildActionClass() {
 		return TapBuildAction.class;
 	}
@@ -135,7 +133,9 @@ public class TapProjectAction implements Action, Describable<TapProjectAction>  
 	}
 
 	/**
-	 * This is run when the page is loaded, it redirects to nodata(.jelly) in case there is no data yet
+	 * This is run when the page is loaded, it redirects to nodata(.jelly) in case
+	 * there is no data yet
+	 * 
 	 * @param request
 	 * @param response
 	 * @throws IOException
@@ -345,72 +345,82 @@ public class TapProjectAction implements Action, Describable<TapProjectAction>  
 	public int getGraphHeight() {
 		return 200;
 	}
-	
-	// My hacking from here	
 
-    public static final String URL_NAME = "consistencyChecks";
-    public static final String ICON_NAME = "/plugin/consistency/icons/tap-24.png";
-    
-    /* (non-Javadoc)
-     * @see hudson.model.Action#getDisplayName()
-     */
-    public String getDisplayName() {
-        return "Consistency Checks";
-    }
+	// My hacking from here
 
-    /* (non-Javadoc)
-     * @see hudson.model.Action#getIconFileName()
-     */
-    public String getIconFileName() {
-        return ICON_NAME;
-    }
+	public static final String URL_NAME = "consistencyChecks";
+	public static final String ICON_NAME = "/plugin/consistency/icons/tap-24.png";
 
-    /* (non-Javadoc)
-     * @see hudson.model.Action#getUrlName()
-     */
-    public String getUrlName() {
-        return URL_NAME;
-    }
-    
-    public String getSearchUrl() {
-        return URL_NAME;
-    }
-    
-    public static class TapProjectActionDescriptor extends Descriptor<TapProjectAction> {}
-    
-    @Extension 
-    public static class DescriptorImpl extends TapProjectActionDescriptor {}
-    
-    @Override
-	public Descriptor<TapProjectAction> getDescriptor() {
-        return Jenkins.getInstance().getDescriptor(getClass());
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see hudson.model.Action#getDisplayName()
+	 */
+	public String getDisplayName() {
+		return "Consistency Checks";
 	}
-	
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see hudson.model.Action#getIconFileName()
+	 */
+	public String getIconFileName() {
+		return ICON_NAME;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see hudson.model.Action#getUrlName()
+	 */
+	public String getUrlName() {
+		return URL_NAME;
+	}
+
+	public String getSearchUrl() {
+		return URL_NAME;
+	}
+
+	public static class TapProjectActionDescriptor extends Descriptor<TapProjectAction> {
+	}
+
+	@Extension
+	public static class DescriptorImpl extends TapProjectActionDescriptor {
+	}
+
+	@Override
+	public Descriptor<TapProjectAction> getDescriptor() {
+		return Jenkins.getInstance().getDescriptor(getClass());
+	}
+
 	public TapProjectAction() throws IOException {
 		this.job = null;
-        XmlFile xml = getConfigFile();
-        if (xml.exists()) {
-            xml.unmarshal(this);
-        }
-    }
-	
+		XmlFile xml = getConfigFile();
+		if (xml.exists()) {
+			xml.unmarshal(this);
+		}
+	}
+
 	public String getDescription() {
 		return "Show a heterogeneous list of subitems with different data bindings for radio buttons and checkboxes";
 	}
 
 	public XmlFile getConfigFile() {
-		return new XmlFile(new File(Jenkins.getInstance().getRootDir(), "stuff.xml"));// TODO stuff.xml?????
+		return new XmlFile(new File(Jenkins.getInstance().getRootDir(), "consistencyChecks.xml"));// TODO stuff.xml?????
 	}
-	
+
 	public List<String> getConsistencyChecks() {
 		List<String> toReturn = new LinkedList<String>();
-		for(Entry e : config.entries) {
-			if(e instanceof ConsistencyRuleEntry) {
-				ConsistencyRuleEntry cre = ((ConsistencyRuleEntry)e);
-				toReturn.add(cre.A + " " + cre.strictness + " consistent with " + cre.B);
+		if (config != null && config.entries != null) {
+			for (Entry e : config.entries) {
+				if (e instanceof ConsistencyRuleEntry) {
+					ConsistencyRuleEntry cre = ((ConsistencyRuleEntry) e);
+					toReturn.add(cre.A + " " + cre.strictness + " consistent with " + cre.B + ". Check is "
+							+ (cre.mute ? "" : "not ") + "muted and " + (cre.skip ? "" : "not ") + "skipped.");
+				}
 			}
 		}
-		//return Arrays.asList(new String[]{"A", "B", "C"});
 		return toReturn;
 	}
 
@@ -454,20 +464,46 @@ public class TapProjectAction implements Action, Describable<TapProjectAction>  
 
 	}
 
-	public static abstract class Entry extends AbstractDescribableImpl<Entry> {
+	// public static abstract class Entry extends AbstractDescribableImpl<Entry> {
+	// }
+
+	public static abstract class Entry implements ExtensionPoint, Describable<Entry> {
+		protected int id;
+
+		protected Entry(int id) {
+			this.id = id;
+		}
+		
+		public Descriptor<Entry> getDescriptor() {
+			return Jenkins.getInstance().getDescriptor(getClass());
+		}
 	}
+	
+	 public static class EntryDescriptor extends Descriptor<Entry> {
+	        public EntryDescriptor(Class<? extends Entry> clazz) {
+	            super(clazz);
+	        }
+	        public String getDisplayName() {
+	            return clazz.getSimpleName();
+	        }
+	    }
 
 	public static final class ConsistencyRuleEntry extends Entry {
 
-		private final String A;
-		private final String B;
-		private final String strictness;
+		private String A;
+		private String B;
+		private String strictness;
+		private boolean mute;
+		private boolean skip;
 
 		@DataBoundConstructor
-		public ConsistencyRuleEntry(String A, String B, String strictness) {
+		public ConsistencyRuleEntry(String A, String B, String strictness, boolean mute, boolean skip) {
+			super(1);//TODO actual ids
 			this.A = A;
 			this.B = B;
 			this.strictness = strictness;
+			this.mute = mute;
+			this.skip = skip;
 		}
 
 		public String getA() {
@@ -480,6 +516,14 @@ public class TapProjectAction implements Action, Describable<TapProjectAction>  
 
 		public String getStrictness() {
 			return strictness;
+		}
+
+		public boolean getMute() {
+			return mute;
+		}
+
+		public boolean getSkip() {
+			return skip;
 		}
 
 		@Extension
