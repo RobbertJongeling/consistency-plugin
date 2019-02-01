@@ -45,6 +45,7 @@ import org.jfree.ui.RectangleInsets;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.tap4j.plugin.AbstractTapProjectAction;
+import org.tap4j.plugin.ConsistencyChecksResult;
 import org.tap4j.plugin.TapBuildAction;
 import org.tap4j.plugin.TapResult;
 
@@ -129,7 +130,7 @@ public class GraphHelper
         {
               NumberOnlyBuildLabel label = (NumberOnlyBuildLabel) dataset.getColumnKey(column);
               TapBuildAction build = label.getRun().getAction(TapBuildAction.class);
-              TapResult report = build.getResult();
+              ConsistencyChecksResult report = build.getResult();
               report.tally();
 
               switch (row) {

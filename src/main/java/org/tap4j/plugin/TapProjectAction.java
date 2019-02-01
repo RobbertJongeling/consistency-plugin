@@ -49,6 +49,7 @@ import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.tap4j.plugin.util.GraphHelper;
+import org.tap4j.plugin.util.Util;
 
 import java.io.File;
 import java.io.IOException;
@@ -316,7 +317,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 
 		TapBuildAction action = b.getAction(getBuildActionClass());
 		if (action != null) {
-			TapResult report = action.getResult();
+			ConsistencyChecksResult report = action.getResult();
 			report.tally();
 
 			r.numPassed = report.getPassed();
@@ -407,7 +408,9 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 	}
 
 	public XmlFile getConfigFile() {
-		return new XmlFile(new File(Jenkins.getInstance().getRootDir(), "consistencyChecks.xml"));// TODO stuff.xml?????
+		//TODO technical debt. 
+		//This means that if we configure checks, then reboot jenkins before doing any build, the checks are gone again.
+		return new XmlFile(new File(Jenkins.getInstance().getRootDir(), "consistencyChecks.xml"));
 	}
 
 	public List<String> getConsistencyChecks() {
@@ -473,20 +476,21 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		protected Entry(int id) {
 			this.id = id;
 		}
-		
+
 		public Descriptor<Entry> getDescriptor() {
 			return Jenkins.getInstance().getDescriptor(getClass());
 		}
 	}
-	
-	 public static class EntryDescriptor extends Descriptor<Entry> {
-	        public EntryDescriptor(Class<? extends Entry> clazz) {
-	            super(clazz);
-	        }
-	        public String getDisplayName() {
-	            return clazz.getSimpleName();
-	        }
-	    }
+
+	public static class EntryDescriptor extends Descriptor<Entry> {
+		public EntryDescriptor(Class<? extends Entry> clazz) {
+			super(clazz);
+		}
+
+		public String getDisplayName() {
+			return clazz.getSimpleName();
+		}
+	}
 
 	public static final class ConsistencyRuleEntry extends Entry {
 
@@ -498,7 +502,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 
 		@DataBoundConstructor
 		public ConsistencyRuleEntry(String A, String B, String strictness, boolean mute, boolean skip) {
-			super(1);//TODO actual ids
+			super(1);// TODO actual ids
 			this.A = A;
 			this.B = B;
 			this.strictness = strictness;

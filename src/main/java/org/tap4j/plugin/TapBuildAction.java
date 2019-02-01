@@ -44,9 +44,9 @@ public class TapBuildAction implements Action, Serializable, StaplerProxy {
 
     private final Run build;
 
-    private TapResult result;
+    private ConsistencyChecksResult result;
 
-    public TapBuildAction(Run build, TapResult result) {
+    public TapBuildAction(Run build, ConsistencyChecksResult result) {
         super();
         this.build = build;
         this.result = result;
@@ -95,12 +95,12 @@ public class TapBuildAction implements Action, Serializable, StaplerProxy {
         return this.build;
     }
 
-    public TapResult getResult() {
+    public ConsistencyChecksResult getResult() {
         return this.result;
     }
 
-    public TapResult getPreviousResult() {
-        TapResult previousResult = null;
+    public ConsistencyChecksResult getPreviousResult() {
+    	ConsistencyChecksResult previousResult = null;
 
         TapBuildAction previousAction = this.getPreviousAction();
 
@@ -124,8 +124,8 @@ public class TapBuildAction implements Action, Serializable, StaplerProxy {
         return previousAction;
     }
 
-    public void mergeResult(TapResult other) {
-        result = result.copyWithExtraTestSets(other.getTestSets());
+    public void mergeResult(ConsistencyChecksResult other) {
+        result = result.copyWithExtraTestSets(other.getCheckResults());
         result.tally();
     }
 }

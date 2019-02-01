@@ -56,33 +56,40 @@ public class TapTestResultAction
     @Deprecated
     public transient AbstractBuild<?,?> owner;
 
-    private TapResult tapResult;
+//    private TapResult tapResult;
+    private ConsistencyChecksResult checksResult;
 
 
-    /**
-     * @param owner
-     * @param tapResult
-     */
-    @Deprecated
-    protected TapTestResultAction(AbstractBuild<?, ?> owner, TapResult tapResult) {
-        this((Run) owner, tapResult);
-    }
+//    /**
+//     * @param owner
+//     * @param tapResult
+//     */
+//    @Deprecated
+//    protected TapTestResultAction(AbstractBuild<?, ?> owner, TapResult tapResult) {
+//        this((Run) owner, tapResult);
+//    }
 
-    /**
-     * @param r
-     * @param tapResult
-     */
-    protected TapTestResultAction(Run r, TapResult tapResult) {
+//    /**
+//     * @param r
+//     * @param tapResult
+//     */
+//    protected TapTestResultAction(Run r, TapResult tapResult) {
+//        setRunAndOwner(r);
+//
+//        this.tapResult = tapResult;
+//    }
+//    
+    protected TapTestResultAction(Run r, ConsistencyChecksResult checksResult) {
         setRunAndOwner(r);
 
-        this.tapResult = tapResult;
+        this.checksResult = checksResult;
     }
 
     /**
      * @return the tapResult
      */
-    public TapResult getTapResult() {
-        return tapResult;
+    public ConsistencyChecksResult getChecksResult() {
+        return checksResult;
     }
 
     /* (non-Javadoc)
@@ -90,7 +97,7 @@ public class TapTestResultAction
      */
     @Exported(visibility = 2)
     public int getFailCount() {
-        return tapResult.getFailed();
+        return checksResult.getFailed();
     }
 
     /* (non-Javadoc)
@@ -98,7 +105,7 @@ public class TapTestResultAction
      */
     @Exported(visibility = 2)
     public int getTotalCount() {
-        return tapResult.getTotal();
+        return checksResult.getTotal();
     }
     
     /* (non-Javadoc)
@@ -106,7 +113,7 @@ public class TapTestResultAction
      */
     @Exported(visibility = 2)
     public int getSkipCount() {
-        return tapResult.getSkipped();
+        return checksResult.getSkipped();
     }
 
     /* (non-Javadoc)
@@ -199,6 +206,11 @@ public class TapTestResultAction
         this.run = r;
         this.owner = r instanceof AbstractBuild ? (AbstractBuild<?,?>) r : null;
     }
+
+	public void mergeResult(ConsistencyChecksResult checksResult2) {
+		// TODO Auto-generated method stub
+		
+	}
 
 //    void mergeResult(TapResult additionalResult) {
 //        TapStreamResult original = getResult();

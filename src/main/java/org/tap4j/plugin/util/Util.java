@@ -28,6 +28,9 @@ import org.tap4j.model.TestResult;
 import org.tap4j.util.DirectiveValues;
 import org.tap4j.util.StatusValues;
 
+import hudson.FilePath;
+import hudson.model.Run;
+
 /**
  * Utility methods used by tap-plugin.
  */
