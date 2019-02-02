@@ -231,9 +231,11 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 
 				TapBuildAction action = build.getAction(TapBuildAction.class);
 				if (action == null) {
+					logger.println("adding tapbuildaction");//TODO this seems to add the consistency check results and the now empty line to the menu on the left
 					action = new TapBuildAction(build, checksResult);
 					build.addAction(action);
 				} else {
+					logger.println("merging result");
 					appending = true;
 					action.mergeResult(checksResult);
 				}

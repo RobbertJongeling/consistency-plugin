@@ -1,17 +1,24 @@
 package org.tap4j.plugin;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import org.tap4j.plugin.model.CheckResult;
 import org.tap4j.plugin.model.TestSetMap;
 
+import hudson.model.ModelObject;
 import hudson.model.Run;
 
-public class ConsistencyChecksResult {
+public class ConsistencyChecksResult implements ModelObject, Serializable {
 	
+    private static final long serialVersionUID = 4343399327336076951L;
+
+    private static final Logger LOGGER = Logger.getLogger(TapResult.class.getName());
+
 	private String name;
 	private Run owner;
 	private Boolean showOnlyFailures;
