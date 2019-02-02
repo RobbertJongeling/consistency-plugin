@@ -410,7 +410,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 	public XmlFile getConfigFile() {
 		//TODO technical debt. 
 		//This means that if we configure checks, then reboot jenkins before doing any build, the checks are gone again.
-		return new XmlFile(new File(Jenkins.getInstance().getRootDir(), "consistencyChecks.xml"));
+		return new XmlFile(new File(Jenkins.getInstance().getRootDir(), "/consistencyChecks.xml"));
 	}
 
 	public List<String> getConsistencyChecks() {

@@ -1,5 +1,7 @@
 package org.tap4j.plugin;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -10,12 +12,16 @@ import hudson.model.Run;
 
 public class ConsistencyChecksResult {
 	
+	private String name;
 	private Run owner;
 	private Boolean showOnlyFailures;
 	private List<CheckResult> checkResults;
 
-	public ConsistencyChecksResult(String string, Run owner, List<CheckResult> checkResults) {
-		// TODO Auto-generated constructor stub
+	public ConsistencyChecksResult(String name, Run owner, List<CheckResult> checkResults) {
+		this.name = name;
+		this.owner = owner;
+		this.checkResults = new LinkedList<CheckResult>();
+		this.checkResults.addAll(checkResults);
 	}
 	
 	public String getConsistencyChecks() {
@@ -42,7 +48,7 @@ public class ConsistencyChecksResult {
 
 	public TreeMap<String, String> getParseErrorTestSets() {
 		// TODO Auto-generated method stub
-		return null;
+		return new TreeMap<String, String>();
 	}
 
 	public boolean hasParseErrors() {
@@ -55,10 +61,44 @@ public class ConsistencyChecksResult {
 		return 20;
 	}
 
-	public ConsistencyChecksResult copyWithExtraTestSets(Object testSets) {
+	public ConsistencyChecksResult copyWithExtraTestSets(List<CheckResult> testSets) {
+		List<CheckResult> mergedTestSets = new ArrayList<CheckResult>(getCheckResults());
+        mergedTestSets.addAll(testSets);
+
+        return new ConsistencyChecksResult(this.getName(), this.getOwner(), mergedTestSets);
+	}
+
+	private Object getIncludeCommentDiagnostics() {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	private Object getValidateNumberOfTests() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private Object getTodoIsFailure() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getName() {
+        return name;
+    }
+	
+	public Run getOwner() {
+        return this.owner;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see hudson.model.ModelObject#getDisplayName()
+     */
+    public String getDisplayName() {
+        return getName();
+    }
 
 	public int getPassed() {
 		// TODO Auto-generated method stub

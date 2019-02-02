@@ -24,7 +24,10 @@
 package org.tap4j.plugin;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -159,33 +162,36 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 			logger.println("Consistency Checking: START");
 			//TODO implement
 			//Stub: //TODO stub first!
-			logger.println("Placeholder, now we only copy the config");
+			logger.println("Placeholder, for now we only copy the config");
 			
 			//copying the config from last build (or default place) to new build
 			//oldPath is previous build, or, if not exists, the default
-			FilePath oldPath = new FilePath(new File(Jenkins.getInstance().getRootDir(), "consistencyChecks.xml"));;
+			FilePath oldPath = new FilePath(new File(Jenkins.getInstance().getRootDir(), "/consistencyChecks.xml"));;
 			if(build.getPreviousBuild() != null) {
 				File file = new File(build.getPreviousBuild().getRootDir().getAbsolutePath() + "/" + consistencyFileName);
 				if(file.exists()) {
 					oldPath = new FilePath(file);					
 				} 
 			}
-			FilePath newPath = new FilePath(new File(build.getRootDir().getAbsolutePath() + "/" + consistencyFileName));
+			File newFile = new File(build.getRootDir().getAbsolutePath() + "/" + consistencyFileName);
+			FilePath newPath = new FilePath(newFile);
 			
+			logger.println("Copying from " + oldPath.toString() + " to " + newPath.toString());
 			oldPath.copyTo(newPath);
-			
+						
 			//end of stub-stub
 			
 			logger.println("Displaying Consistency Checking Results: START");
 			
-			logger.println("checking for results in workspace: " + workspace.toString());
-			FilePath results = new FilePath(new File(build.getRootDir().getAbsolutePath() + consistencyFileName));
+//			logger.println("checking for results in workspace: " + workspace.toString());
+			logger.println("checking for results in " + build.getRootDir().getAbsolutePath() + "/" + consistencyFileName);
+			FilePath results = new FilePath(new File(build.getRootDir().getAbsolutePath() + "/" + consistencyFileName));
 
-			boolean filesSaved = saveReports(workspace, ConsistencyChecker.getReportsDirectory(build), results, logger);
-			if (!filesSaved) {
-				logger.println("Failed to save Consistency Check reports");
-				return Boolean.TRUE;
-			}
+//			boolean filesSaved = saveReports(workspace, ConsistencyChecker.getReportsDirectory(build), results, logger);
+//			if (!filesSaved) {
+//				logger.println("Failed to save Consistency Check reports");
+//				return Boolean.TRUE;
+//			}
 
 			ConsistencyChecksResult checksResult = null;
 			try {
@@ -207,9 +213,11 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
     
             if (trAction == null) {
                 appending = false;
+                logger.println("no taptestresultaction yet, appending false");
                 trAction = new TapTestResultAction(build, checksResult);
             } else {
                 appending = true;
+                logger.println("taptestresultaction existing, appending true");
                 trAction.mergeResult(checksResult);
             }
     
@@ -217,44 +225,43 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
                 build.addAction(trAction);
             }
 
-//            //TODO NPE on this line.
-//			if (checksResult.getCheckResults().size() > 0 || checksResult.getParseErrorTestSets().size() > 0) {
-//				// create an individual report for all of the results and add it to
-//				// the build
-//
-//				TapBuildAction action = build.getAction(TapBuildAction.class);
-//				if (action == null) {
-//					action = new TapBuildAction(build, checksResult);
-//					build.addAction(action);
-//				} else {
-//					appending = true;
-//					action.mergeResult(checksResult);
-//				}
-//
-//				if (checksResult.hasParseErrors()) {
-//					listener.getLogger().println("TAP parse errors found in the build. Marking build as UNSTABLE");
-//					build.setResult(Result.UNSTABLE);
-//				}
-//
-//				if (checksResult.getFailed() > 0) {
-//					if (this.getFailIfChecksFail()) {
-//						listener.getLogger().println(
-//								"There are failed test cases and the job is configured to mark the build as failure. Marking build as FAILURE");
-//						build.setResult(Result.FAILURE);
-//					} else {
-//						listener.getLogger().println("There are failed test cases. Marking build as UNSTABLE");
-//						build.setResult(Result.UNSTABLE);
-//					}
-//				}
-//
-//				if (appending) {
-//					build.save();
-//				}
-//
-//			} else {
-//				logger.println("Found matching files but did not find any TAP results.");
-//				return Boolean.TRUE;
-//			}
+			if (checksResult.getCheckResults().size() > 0 || checksResult.getParseErrorTestSets().size() > 0) {
+				// create an individual report for all of the results and add it to
+				// the build
+
+				TapBuildAction action = build.getAction(TapBuildAction.class);
+				if (action == null) {
+					action = new TapBuildAction(build, checksResult);
+					build.addAction(action);
+				} else {
+					appending = true;
+					action.mergeResult(checksResult);
+				}
+
+				if (checksResult.hasParseErrors()) {
+					listener.getLogger().println("TAP parse errors found in the build. Marking build as UNSTABLE");
+					build.setResult(Result.UNSTABLE);
+				}
+
+				if (checksResult.getFailed() > 0) {
+					if (this.getFailIfChecksFail()) {
+						listener.getLogger().println(
+								"There are failed test cases and the job is configured to mark the build as failure. Marking build as FAILURE");
+						build.setResult(Result.FAILURE);
+					} else {
+						listener.getLogger().println("There are failed test cases. Marking build as UNSTABLE");
+						build.setResult(Result.UNSTABLE);
+					}
+				}
+
+				if (appending) {
+					build.save();
+				}
+
+			} else {
+				logger.println("Found matching files but did not find any TAP results.");
+				return Boolean.TRUE;
+			}
 			build.setResult(Result.SUCCESS); //TODO remove
 			logger.println("Consistency Checking: FINISH");
 		} else {

@@ -51,7 +51,7 @@ public class ConsistencyChecksParser {
 			XmlFile ccFile = new XmlFile(new File(results.getRemote()));
 			
 			try {
-				log("printing xmlfile as string");
+				log("printing xmlfile as string " + ccFile.getFile().getAbsolutePath());
 				log(ccFile.asString());
 			} catch (IOException e) {
 				log("logging ccFile as String failed miserably. Just give up all hope.");
