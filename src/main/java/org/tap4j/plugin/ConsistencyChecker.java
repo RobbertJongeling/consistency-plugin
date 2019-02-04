@@ -332,7 +332,8 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 		} catch (Exception e) {
 			e.printStackTrace(logger);
 
-			ccr = new ConsistencyChecksResult("", owner, Collections.<CheckResult>emptyList());
+			//TODO fix this, for now null since exception scenario anyway.
+			ccr = new ConsistencyChecksResult("", null, owner, Collections.<CheckResult>emptyList());
 			ccr.setOwner(owner);
 			return ccr;
 		}

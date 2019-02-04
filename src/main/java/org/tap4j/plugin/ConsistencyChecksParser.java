@@ -38,18 +38,12 @@ public class ConsistencyChecksParser {
 		this.logger = logger;
 		final List<CheckResult> checkSets = new LinkedList<CheckResult>();
 		
+		XmlFile ccFile = null;
+		
 		if(results == null) {
 			log("No Consistency Checks found. Returning empty checks results.");
 		} else {
-			//this should be called only once I suppose,
-			//since we save everything in this one consistencyChecks.xml 
-			//but let's keep it generic
-			//for (FilePath path : results) { 
-			
-			log("Getting this hardocded xml file");
-//			XmlFile ccFile = new XmlFile(new File(path.getRemote()));
-//			XmlFile ccFile = new XmlFile(new File(Jenkins.getInstance().getRootDir(), "consistencyChecks.xml"));
-			XmlFile ccFile = new XmlFile(new File(results.getRemote()));
+			ccFile = new XmlFile(new File(results.getRemote()));
 			
 			try {
 				log("printing xmlfile as string " + ccFile.getFile().getAbsolutePath());
@@ -57,14 +51,13 @@ public class ConsistencyChecksParser {
 			} catch (IOException e) {
 				log("logging ccFile as String failed miserably. Just give up all hope.");
 			}
-			//}
 		}
 		
 		log("adding dummy check result for testing");//TODO remove ofc.
 		checkSets.add(new CheckResult(new ConsistencyRuleEntry("test1", "test2", "strict", false, false ), true, "it works"));
 		checkSets.add(new CheckResult(new ConsistencyRuleEntry("test3", "test4", "loose", false, false ), false, "it doesn't work"));
 		
-		final ConsistencyChecksResult checksResult = new ConsistencyChecksResult("Consistency Checks Results", build, checkSets);
+		final ConsistencyChecksResult checksResult = new ConsistencyChecksResult("Consistency Checks Results", ccFile, build, checkSets);
 		return checksResult;
 	}
 

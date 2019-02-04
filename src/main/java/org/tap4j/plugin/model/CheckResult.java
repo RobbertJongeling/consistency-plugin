@@ -12,4 +12,16 @@ public class CheckResult {
 		this.pass = pass;
 		this.comment = comment;
 	}
+	
+	public ConsistencyRuleEntry getCRE() {
+		return cre;
+	}
+	
+	public boolean getPass() {
+		return pass;
+	}
+	
+	public String getComment() {
+		return comment;
+	}
 }
