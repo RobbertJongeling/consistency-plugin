@@ -419,8 +419,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			for (Entry e : config.entries) {
 				if (e instanceof ConsistencyRuleEntry) {
 					ConsistencyRuleEntry cre = ((ConsistencyRuleEntry) e);
-					toReturn.add(cre.A + " " + cre.strictness + " consistent with " + cre.B + ". Check is "
-							+ (cre.mute ? "" : "not ") + "muted and " + (cre.skip ? "" : "not ") + "skipped.");
+					toReturn.add(cre.toString());
 				}
 			}
 		}
@@ -540,6 +539,12 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			public ListBoxModel doFillStrictnessItems() {
 				return new ListBoxModel().add("strict").add("medium").add("loose");
 			}
+		}
+		
+		@Override
+		public String toString() {
+			return A + " " + strictness + " consistent with " + B + ". Check is "
+			+ (mute ? "" : "not ") + "muted and " + (skip ? "" : "not ") + "skipped.";
 		}
 	}
 }

@@ -36,14 +36,15 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
     private static final Logger LOGGER = Logger.getLogger(TapResult.class.getName());
 
 	private String name;
-	private XmlFile resultsFile;
+	private String resultsFilePath;
 	private Run owner;
 	private Boolean showOnlyFailures;
 	private List<CheckResult> checkResults;
 	private Config config;
 
-	public ConsistencyChecksResult(String name, XmlFile resultsFile, Run owner, List<CheckResult> checkResults) {
+	public ConsistencyChecksResult(String name, String resultsFile, Run owner, List<CheckResult> checkResults) {
 		this.name = name;
+		this.resultsFilePath = resultsFile;
 		this.owner = owner;
 		this.checkResults = new LinkedList<CheckResult>();
 		this.checkResults.addAll(checkResults);
@@ -108,7 +109,7 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 		List<CheckResult> mergedTestSets = new ArrayList<CheckResult>(getCheckResults());
         mergedTestSets.addAll(testSets);
 
-        return new ConsistencyChecksResult(this.getName(), this.getResultsFile(), this.getOwner(), mergedTestSets);
+        return new ConsistencyChecksResult(this.getName(), this.getResultsFilePath(), this.getOwner(), mergedTestSets);
 	}
 
 	private Object getIncludeCommentDiagnostics() {
@@ -131,7 +132,12 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
     }
 	
 	public XmlFile getResultsFile() {
-		return resultsFile;
+//		return resultsFile;
+		return new XmlFile(new File(this.getResultsFilePath()));
+	}
+	
+	public String getResultsFilePath() {
+		return resultsFilePath;
 	}
 	
 	public Run getOwner() {

@@ -38,12 +38,13 @@ public class ConsistencyChecksParser {
 		this.logger = logger;
 		final List<CheckResult> checkSets = new LinkedList<CheckResult>();
 		
-		XmlFile ccFile = null;
+		String ccFilePath = "";
 		
 		if(results == null) {
 			log("No Consistency Checks found. Returning empty checks results.");
 		} else {
-			ccFile = new XmlFile(new File(results.getRemote()));
+			ccFilePath = results.getRemote();
+			XmlFile ccFile = new XmlFile(new File(results.getRemote()));
 			
 			try {
 				log("printing xmlfile as string " + ccFile.getFile().getAbsolutePath());
@@ -57,7 +58,7 @@ public class ConsistencyChecksParser {
 		checkSets.add(new CheckResult(new ConsistencyRuleEntry("test1", "test2", "strict", false, false ), true, "it works"));
 		checkSets.add(new CheckResult(new ConsistencyRuleEntry("test3", "test4", "loose", false, false ), false, "it doesn't work"));
 		
-		final ConsistencyChecksResult checksResult = new ConsistencyChecksResult("Consistency Checks Results", ccFile, build, checkSets);
+		final ConsistencyChecksResult checksResult = new ConsistencyChecksResult("Consistency Checks Results", ccFilePath, build, checkSets);
 		return checksResult;
 	}
 
