@@ -26,7 +26,7 @@ import jenkins.model.Jenkins;
 public class ConsistencyChecksParser {
 	
 	//TODO CheckResult can contain a ConsistencyRuleEntry and a ConsistencyResult (which would be just pass/fail with optional comments)
-	private List<CheckResult> checkResults;
+	private List<ConsistencyRuleEntry> checkResults;
 	
 	private boolean parseErrors, hasFailedTests;
 	private PrintStream logger;
@@ -36,7 +36,7 @@ public class ConsistencyChecksParser {
 		this.parseErrors = false;
 		this.hasFailedTests = false;
 		this.logger = logger;
-		final List<CheckResult> checkSets = new LinkedList<CheckResult>();
+		final List<ConsistencyRuleEntry> checkSets = new LinkedList<ConsistencyRuleEntry>();
 		
 		String ccFilePath = "";
 		
@@ -55,8 +55,13 @@ public class ConsistencyChecksParser {
 		}
 		
 		log("adding dummy check result for testing");//TODO remove ofc.
-		checkSets.add(new CheckResult(new ConsistencyRuleEntry("test1", "test2", "strict", false, false ), true, "it works"));
-		checkSets.add(new CheckResult(new ConsistencyRuleEntry("test3", "test4", "loose", false, false ), false, "it doesn't work"));
+//		checkSets.add(new CheckResult(new ConsistencyRuleEntry("test1", "test2", "strict", false, false ), true, "it works"));
+//		checkSets.add(new CheckResult(new ConsistencyRuleEntry("test3", "test4", "loose", false, false ), false, "it doesn't work"));
+		
+		checkSets.add(new ConsistencyRuleEntry("test1", "test2", "strict", false, false, CheckResult.PASS, "it works" ));
+		checkSets.add(new ConsistencyRuleEntry("test3", "test4", "loose", false, true, CheckResult.FAIL, "it doesn't work"));
+		checkSets.add(new ConsistencyRuleEntry("test5", "test6", "medium", true, false, CheckResult.NYE, "not yet executed"));
+		checkSets.add(new ConsistencyRuleEntry("test7", "test8", "medium", true, true, CheckResult.PASS, "it works"));
 		
 		final ConsistencyChecksResult checksResult = new ConsistencyChecksResult("Consistency Checks Results", ccFilePath, build, checkSets);
 		return checksResult;

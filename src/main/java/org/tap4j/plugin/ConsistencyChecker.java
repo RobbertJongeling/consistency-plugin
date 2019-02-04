@@ -39,6 +39,7 @@ import org.apache.commons.lang.BooleanUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.tap4j.model.Plan;
 import org.tap4j.model.TestSet;
+import org.tap4j.plugin.TapProjectAction.ConsistencyRuleEntry;
 import org.tap4j.plugin.model.CheckResult;
 import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.Constants;
@@ -333,7 +334,7 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 			e.printStackTrace(logger);
 
 			//TODO fix this, for now null since exception scenario anyway.
-			ccr = new ConsistencyChecksResult("", null, owner, Collections.<CheckResult>emptyList());
+			ccr = new ConsistencyChecksResult("", null, owner, Collections.<ConsistencyRuleEntry>emptyList());
 			ccr.setOwner(owner);
 			return ccr;
 		}

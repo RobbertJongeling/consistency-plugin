@@ -13,38 +13,7 @@
 		<l:main-panel>
 			
 			<h1>Consistency Checks Results</h1>
-			<h2>Here the checks can be modified for the next build</h2>
-			<!-- this version does not work with databound stuff, that would work much easier I guess, so I try that below
-			<j:forEach var="checkResult" items="${it.checkResults}">
-				<j:choose>
-	    	 		<j:when test="${checkResult.getPass()}">
-						<p>File: <span class="underline">This testcase passes!</span></p>
-			 		</j:when>
-					<j:otherwise>
-						<p>File: <span class="underline">This testcase fails!</span></p>
-					</j:otherwise>
-			   	</j:choose>
-			   	
-			   	<j:forEach var="cre" items="${checkResult.getCRE()}">
-					<f:entry field="A" title="A">
-				        <f:textbox/>
-				    </f:entry>
-				    <f:entry field="B" title="B">
-				        <f:textbox/>
-				    </f:entry>
-				    <f:entry field="strictness" title="Strictness">
-				          <f:select />
-				    </f:entry>
-				    <f:entry title="">
-				    	<f:checkbox name="mute" checked="${entry.mute}" title="Mute this check until a change"/>
-				    </f:entry>
-				    <f:entry title="">
-				    	<f:checkbox name="skip" checked="${entry.skip}" title="Skip this check until turned on"/>
-				    </f:entry>
-                </j:forEach>
-			</j:forEach>	
-			-->
-			
+			<h2>Here the checks results can be viewed and the check rules can be modified for the next build</h2>			
 			<f:form action="configSubmit" name="config" method="post">
                 <j:set var="instance" value="${it}"/>
                 <j:set var="descriptor" value="${it.descriptor}"/>
@@ -54,14 +23,6 @@
                     <f:apply/>
                 </f:bottomButtonBar>
             </f:form>
-			
-			<!-- TODO now allow for new entries 
-			<f:section title="Entries">
-		        <f:block>
-		            <f:repeatableHeteroProperty field="entries" hasHeader="true"/>
-		        </f:block>
-		    </f:section>
-		    -->			
 		</l:main-panel>
 	</l:layout>
 </j:jelly>

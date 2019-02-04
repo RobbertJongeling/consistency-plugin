@@ -48,6 +48,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+import org.tap4j.plugin.model.CheckResult;
 import org.tap4j.plugin.util.GraphHelper;
 import org.tap4j.plugin.util.Util;
 
@@ -498,15 +499,19 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		private String strictness;
 		private boolean mute;
 		private boolean skip;
-
+		private CheckResult result;
+		private String resultText;
+		
 		@DataBoundConstructor
-		public ConsistencyRuleEntry(String A, String B, String strictness, boolean mute, boolean skip) {
+		public ConsistencyRuleEntry(String A, String B, String strictness, boolean mute, boolean skip, CheckResult result, String resultText) {
 			super(1);// TODO actual ids
 			this.A = A;
 			this.B = B;
 			this.strictness = strictness;
 			this.mute = mute;
 			this.skip = skip;
+			this.result = result;
+			this.resultText = resultText;
 		}
 
 		public String getA() {
@@ -521,13 +526,25 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			return strictness;
 		}
 
-		public boolean getMute() {
+		public Boolean getMute() {
 			return mute;
 		}
 
 		public boolean getSkip() {
 			return skip;
 		}
+		
+		public CheckResult getResult() {
+			return result;
+		}
+		
+		public String getResultText() {
+			return resultText;
+		}
+		
+		public boolean wasRun() {
+			return result != CheckResult.NYE;
+		}		
 
 		@Extension
 		public static final class DescriptorImpl extends Descriptor<Entry> {

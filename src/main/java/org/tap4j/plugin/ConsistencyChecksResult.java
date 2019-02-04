@@ -39,21 +39,16 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 	private String resultsFilePath;
 	private Run owner;
 	private Boolean showOnlyFailures;
-	private List<CheckResult> checkResults;
+	private List<ConsistencyRuleEntry> checkResults;
 	private Config config;
 
-	public ConsistencyChecksResult(String name, String resultsFile, Run owner, List<CheckResult> checkResults) {
+	public ConsistencyChecksResult(String name, String resultsFile, Run owner, List<ConsistencyRuleEntry> checkResults) {
 		this.name = name;
 		this.resultsFilePath = resultsFile;
 		this.owner = owner;
-		this.checkResults = new LinkedList<CheckResult>();
+		this.checkResults = new LinkedList<ConsistencyRuleEntry>();
 		this.checkResults.addAll(checkResults);
-		
-		List<ConsistencyRuleEntry> allEntries = new LinkedList<ConsistencyRuleEntry>();
-		for(CheckResult cr : checkResults) {
-			allEntries.add(cr.getCRE());
-		}
-		this.config = new Config(allEntries);
+		this.config = new Config(this.checkResults);
 	}
 	
 	public static class ConsistencyChecksResultDescriptor extends Descriptor<ConsistencyChecksResult> {
@@ -86,7 +81,7 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 		
 	}
 
-	public List<CheckResult> getCheckResults() {
+	public List<ConsistencyRuleEntry> getCheckResults() {
 		return checkResults;
 	}
 
@@ -105,8 +100,8 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 		return 20;
 	}
 
-	public ConsistencyChecksResult copyWithExtraTestSets(List<CheckResult> testSets) {
-		List<CheckResult> mergedTestSets = new ArrayList<CheckResult>(getCheckResults());
+	public ConsistencyChecksResult copyWithExtraTestSets(List<ConsistencyRuleEntry> testSets) {
+		List<ConsistencyRuleEntry> mergedTestSets = new ArrayList<ConsistencyRuleEntry>(getCheckResults());
         mergedTestSets.addAll(testSets);
 
         return new ConsistencyChecksResult(this.getName(), this.getResultsFilePath(), this.getOwner(), mergedTestSets);
