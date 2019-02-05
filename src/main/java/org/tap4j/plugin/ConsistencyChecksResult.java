@@ -18,6 +18,7 @@ import org.tap4j.plugin.TapProjectAction.ConsistencyRuleEntry;
 import org.tap4j.plugin.TapProjectAction.TapProjectActionDescriptor;
 import org.tap4j.plugin.model.CheckResult;
 import org.tap4j.plugin.model.TestSetMap;
+import org.tap4j.plugin.TapProjectAction.Entry;
 
 import hudson.Extension;
 import hudson.XmlFile;
@@ -25,7 +26,6 @@ import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.model.ModelObject;
 import hudson.model.Run;
-import hudson.scm.ChangeLogSet.Entry;
 import hudson.util.FormApply;
 import jenkins.model.Jenkins;
 
@@ -39,16 +39,17 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 	private String resultsFilePath;
 	private Run owner;
 	private Boolean showOnlyFailures;
-	private List<ConsistencyRuleEntry> checkResults;
+	//private List<ConsistencyRuleEntry> checkResults;
 	private Config config;
 
-	public ConsistencyChecksResult(String name, String resultsFile, Run owner, List<ConsistencyRuleEntry> checkResults) {
+	public ConsistencyChecksResult(String name, String resultsFilePath, Run owner, Config config /*List<ConsistencyRuleEntry> checkResults*/) {
 		this.name = name;
-		this.resultsFilePath = resultsFile;
+		this.resultsFilePath = resultsFilePath;
 		this.owner = owner;
-		this.checkResults = new LinkedList<ConsistencyRuleEntry>();
-		this.checkResults.addAll(checkResults);
-		this.config = new Config(this.checkResults);
+//		this.checkResults = new LinkedList<ConsistencyRuleEntry>();
+//		this.checkResults.addAll(checkResults);
+//		this.config = new Config(this.checkResults);
+		this.config = config;
 	}
 	
 	public static class ConsistencyChecksResultDescriptor extends Descriptor<ConsistencyChecksResult> {
@@ -81,9 +82,9 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 		
 	}
 
-	public List<ConsistencyRuleEntry> getCheckResults() {
-		return checkResults;
-	}
+//	public List<ConsistencyRuleEntry> getCheckResults() {
+//		return checkResults;
+//	}
 
 	public TreeMap<String, String> getParseErrorTestSets() {
 		// TODO Auto-generated method stub
@@ -100,12 +101,15 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 		return 20;
 	}
 
-	public ConsistencyChecksResult copyWithExtraTestSets(List<ConsistencyRuleEntry> testSets) {
-		List<ConsistencyRuleEntry> mergedTestSets = new ArrayList<ConsistencyRuleEntry>(getCheckResults());
-        mergedTestSets.addAll(testSets);
-
-        return new ConsistencyChecksResult(this.getName(), this.getResultsFilePath(), this.getOwner(), mergedTestSets);
-	}
+//	public ConsistencyChecksResult copyWithExtraTestSets(List<Entry> testSets) {
+////		List<ConsistencyRuleEntry> mergedTestSets = new ArrayList<ConsistencyRuleEntry>(getCheckResults());
+//		Config newConfig = config;
+//		List<Entry> mergedTestSets = new ArrayList<Entry>(config.getEntries());		
+//        mergedTestSets.addAll(testSets);
+//        newConfig.setterForEntries(mergedTestSets);
+//
+//        return new ConsistencyChecksResult(this.getName(), this.getResultsFilePath(), this.getOwner(), newConfig);
+//	}
 
 	private Object getIncludeCommentDiagnostics() {
 		// TODO Auto-generated method stub
@@ -132,6 +136,9 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 	}
 	
 	public String getResultsFilePath() {
+		if(resultsFilePath == null || resultsFilePath.equals("")) {
+			resultsFilePath = owner.getRootDir() + "/consistencyChecks.xml";
+		}
 		return resultsFilePath;
 	}
 	
@@ -148,9 +155,11 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 	}
 	
 	public HttpResponse doConfigSubmit(StaplerRequest req) throws ServletException, IOException {
+//		Config temp = config; //since config needs to be null for submitting, but if we leave it null then after save everything is gone.
 		config = null; // otherwise bindJSON will never clear it once set
 		req.bindJSON(this, req.getSubmittedForm());
 		getResultsFile().write(this);
+//		config = temp;
 		return FormApply.success(".");
 	}
 

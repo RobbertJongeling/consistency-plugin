@@ -40,6 +40,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.tap4j.model.Plan;
 import org.tap4j.model.TestSet;
 import org.tap4j.plugin.TapProjectAction.ConsistencyRuleEntry;
+import org.tap4j.plugin.TapProjectAction.Entry;
 import org.tap4j.plugin.model.CheckResult;
 import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.Constants;
@@ -167,7 +168,8 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 			
 			//copying the config from last build (or default place) to new build
 			//oldPath is previous build, or, if not exists, the default
-			FilePath oldPath = new FilePath(new File(Jenkins.getInstance().getRootDir(), "/consistencyChecks.xml"));;
+//			FilePath oldPath = new FilePath(new File(Jenkins.getInstance().getRootDir(), "/consistencyChecks.xml"));
+			FilePath oldPath = new FilePath(new File(build.getRootDir(), "/consistencyChecks.xml"));
 			if(build.getPreviousBuild() != null) {
 				File file = new File(build.getPreviousBuild().getRootDir().getAbsolutePath() + "/" + consistencyFileName);
 				if(file.exists()) {
@@ -226,7 +228,7 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
                 build.addAction(trAction);
             }
 
-			if (checksResult.getCheckResults().size() > 0 || checksResult.getParseErrorTestSets().size() > 0) {
+			if (checksResult.getConfig().getEntries().size() > 0 || checksResult.getParseErrorTestSets().size() > 0) {
 				// create an individual report for all of the results and add it to
 				// the build
 
@@ -236,9 +238,9 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 					action = new TapBuildAction(build, checksResult);
 					build.addAction(action);
 				} else {
-					logger.println("merging result");
+					logger.println("merging result NYI!");
 					appending = true;
-					action.mergeResult(checksResult);
+//					action.mergeResult(checksResult); //TODO
 				}
 
 				if (checksResult.hasParseErrors()) {
@@ -334,7 +336,7 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 			e.printStackTrace(logger);
 
 			//TODO fix this, for now null since exception scenario anyway.
-			ccr = new ConsistencyChecksResult("", null, owner, Collections.<ConsistencyRuleEntry>emptyList());
+			ccr = new ConsistencyChecksResult("", null, owner, null);
 			ccr.setOwner(owner);
 			return ccr;
 		}

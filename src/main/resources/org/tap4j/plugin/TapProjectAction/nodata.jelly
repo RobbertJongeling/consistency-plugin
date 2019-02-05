@@ -11,16 +11,16 @@
 	            <a href="addChecks">Add Consistency Checks!</a>
 	        </p>              
 	        <j:if test="${it.configFile.exists()}">
-            <p>
-                Current configuration:
-            </p>
-            <p>
-	            <j:forEach items="${it.consistencyChecks}" var="i">
-	             <li>${i}</li>
-	           </j:forEach>
-            </p>
-            
-        </j:if>                    
+	            <p>
+	                Current configuration:
+	            </p>
+	            <p>
+		            <j:forEach items="${it.consistencyChecks}" var="i">
+		             <li>${i}</li>
+		           </j:forEach>
+	            </p>
+	            
+	        </j:if>                    
         </l:main-panel>
     </l:layout>
 </j:jelly>

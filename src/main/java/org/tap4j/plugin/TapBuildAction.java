@@ -124,8 +124,8 @@ public class TapBuildAction implements Action, Serializable, StaplerProxy {
         return previousAction;
     }
 
-    public void mergeResult(ConsistencyChecksResult other) {
-        result = result.copyWithExtraTestSets(other.getCheckResults());
-        result.tally();
-    }
+//    public void mergeResult(ConsistencyChecksResult other) {
+//        result = result.copyWithExtraTestSets(other.getCon());
+//        result.tally();
+//    }
 }

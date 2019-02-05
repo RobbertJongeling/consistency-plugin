@@ -45,6 +45,7 @@ import jenkins.model.Jenkins;
 
 import org.jfree.chart.JFreeChart;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -396,22 +397,20 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		return Jenkins.getInstance().getDescriptor(getClass());
 	}
 
-	public TapProjectAction() throws IOException {
-		this.job = null;
-		XmlFile xml = getConfigFile();
-		if (xml.exists()) {
-			xml.unmarshal(this);
-		}
-	}
+//	public TapProjectAction() throws IOException {
+//		this.job = null;
+//		XmlFile xml = getConfigFile();
+//		if (xml.exists()) {
+//			xml.unmarshal(this);
+//		}
+//	}
 
 	public String getDescription() {
 		return "Show a heterogeneous list of subitems with different data bindings for radio buttons and checkboxes";
 	}
 
 	public XmlFile getConfigFile() {
-		//TODO technical debt. 
-		//This means that if we configure checks, then reboot jenkins before doing any build, the checks are gone again.
-		return new XmlFile(new File(Jenkins.getInstance().getRootDir(), "/consistencyChecks.xml"));
+		return new XmlFile(new File(job.getRootDir(), "/consistencyChecks.xml"));
 	}
 
 	public List<String> getConsistencyChecks() {
@@ -423,6 +422,8 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 					toReturn.add(cre.toString());
 				}
 			}
+		} else {
+			toReturn.add("config is null");
 		}
 		return toReturn;
 	}
@@ -449,8 +450,8 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		private final List<Entry> entries;
 
 		@DataBoundConstructor
-		public Config(List<ConsistencyRuleEntry> allEntries) {
-			this.entries = allEntries != null ? new ArrayList<Entry>(allEntries) : Collections.<Entry>emptyList();
+		public Config(List<Entry> entries) {
+			this.entries = entries != null ? new ArrayList<Entry>(entries) : Collections.<Entry>emptyList();
 		}
 
 		public List<Entry> getEntries() {
@@ -464,13 +465,11 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 				return "";
 			}
 		}
-
 	}
 
-	// public static abstract class Entry extends AbstractDescribableImpl<Entry> {
-	// }
+	 public static abstract class Entry extends AbstractDescribableImpl<Entry> {}
 
-	public static abstract class Entry implements ExtensionPoint, Describable<Entry> {
+	/*public static abstract class Entry implements ExtensionPoint, Describable<Entry> {
 		protected int id;
 
 		protected Entry(int id) {
@@ -480,7 +479,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		public Descriptor<Entry> getDescriptor() {
 			return Jenkins.getInstance().getDescriptor(getClass());
 		}
-	}
+	}*/
 
 	public static class EntryDescriptor extends Descriptor<Entry> {
 		public EntryDescriptor(Class<? extends Entry> clazz) {
@@ -499,12 +498,11 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		private String strictness;
 		private boolean mute;
 		private boolean skip;
-		private CheckResult result;
+		private String result;
 		private String resultText;
 		
 		@DataBoundConstructor
-		public ConsistencyRuleEntry(String A, String B, String strictness, boolean mute, boolean skip, CheckResult result, String resultText) {
-			super(1);// TODO actual ids
+		public ConsistencyRuleEntry(String A, String B, String strictness, boolean mute, boolean skip, String result, String resultText) {
 			this.A = A;
 			this.B = B;
 			this.strictness = strictness;
@@ -534,17 +532,13 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			return skip;
 		}
 		
-		public CheckResult getResult() {
+		public String getResult() {
 			return result;
 		}
 		
 		public String getResultText() {
 			return resultText;
 		}
-		
-		public boolean wasRun() {
-			return result != CheckResult.NYE;
-		}		
 
 		@Extension
 		public static final class DescriptorImpl extends Descriptor<Entry> {

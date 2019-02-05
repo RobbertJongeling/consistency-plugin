@@ -11,7 +11,9 @@ import org.apache.commons.io.FileUtils;
 import org.tap4j.model.TestSet;
 import org.tap4j.parser.ParserException;
 import org.tap4j.parser.Tap13Parser;
+import org.tap4j.plugin.TapProjectAction.Config;
 import org.tap4j.plugin.TapProjectAction.ConsistencyRuleEntry;
+import org.tap4j.plugin.TapProjectAction.Entry;
 import org.tap4j.plugin.model.CheckResult;
 import org.tap4j.plugin.model.ParseErrorTestSetMap;
 import org.tap4j.plugin.model.TestSetMap;
@@ -36,7 +38,7 @@ public class ConsistencyChecksParser {
 		this.parseErrors = false;
 		this.hasFailedTests = false;
 		this.logger = logger;
-		final List<ConsistencyRuleEntry> checkSets = new LinkedList<ConsistencyRuleEntry>();
+		final List<Entry> checkSets = new LinkedList<Entry>();
 		
 		String ccFilePath = "";
 		
@@ -58,12 +60,12 @@ public class ConsistencyChecksParser {
 //		checkSets.add(new CheckResult(new ConsistencyRuleEntry("test1", "test2", "strict", false, false ), true, "it works"));
 //		checkSets.add(new CheckResult(new ConsistencyRuleEntry("test3", "test4", "loose", false, false ), false, "it doesn't work"));
 		
-		checkSets.add(new ConsistencyRuleEntry("test1", "test2", "strict", false, false, CheckResult.PASS, "it works" ));
-		checkSets.add(new ConsistencyRuleEntry("test3", "test4", "loose", false, true, CheckResult.FAIL, "it doesn't work"));
-		checkSets.add(new ConsistencyRuleEntry("test5", "test6", "medium", true, false, CheckResult.NYE, "not yet executed"));
-		checkSets.add(new ConsistencyRuleEntry("test7", "test8", "medium", true, true, CheckResult.PASS, "it works"));
+		checkSets.add(new ConsistencyRuleEntry("test1", "test2", "strict", false, false, "PASS", "it works" ));
+		checkSets.add(new ConsistencyRuleEntry("test3", "test4", "loose", false, true, "FAIL", "it doesn't work"));
+		checkSets.add(new ConsistencyRuleEntry("test5", "test6", "medium", true, false, "NYE", "not yet executed"));
+		checkSets.add(new ConsistencyRuleEntry("test7", "test8", "medium", true, true, "PASS", "it works"));
 		
-		final ConsistencyChecksResult checksResult = new ConsistencyChecksResult("Consistency Checks Results", ccFilePath, build, checkSets);
+		final ConsistencyChecksResult checksResult = new ConsistencyChecksResult("Consistency Checks Results", ccFilePath, build, new Config(checkSets));
 		return checksResult;
 	}
 
