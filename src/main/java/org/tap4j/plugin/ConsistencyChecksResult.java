@@ -41,6 +41,12 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 	private Boolean showOnlyFailures;
 	//private List<ConsistencyRuleEntry> checkResults;
 	private Config config;
+	
+	private int nrPassed;
+	private int nrFailed;
+	private int nrSkipped;
+	private int nrTodo;
+	private int total;
 
 	public ConsistencyChecksResult(String name, String resultsFilePath, Run owner, Config config /*List<ConsistencyRuleEntry> checkResults*/) {
 		this.name = name;
@@ -77,11 +83,6 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 		
 	}
 
-	public void tally() {
-		// TODO Auto-generated method stub
-		
-	}
-
 //	public List<ConsistencyRuleEntry> getCheckResults() {
 //		return checkResults;
 //	}
@@ -94,11 +95,6 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 	public boolean hasParseErrors() {
 		// TODO Auto-generated method stub
 		return false;
-	}
-
-	public int getFailed() {
-		// TODO Auto-generated method stub
-		return 20;
 	}
 
 //	public ConsistencyChecksResult copyWithExtraTestSets(List<Entry> testSets) {
@@ -172,24 +168,59 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
         return getName();
     }
 
+    public void tally() {
+    	int passes = 0;
+    	int fails = 0;
+    	int skips = 0;
+    	int todos = 0;
+		for(Entry e : config.getEntries()) {
+			if(e instanceof ConsistencyRuleEntry) {
+				ConsistencyRuleEntry cre = (ConsistencyRuleEntry)e;
+				switch(cre.getResult()) {
+				case PASS:
+					passes++;
+					break;
+				case FAIL:
+					fails++;
+					break;
+				case SKIP:
+					skips++;
+					break;
+				case MUTE:
+					//on purpose. This is used in summaries, so there essentially skip==mute.
+					skips++; 
+					break;
+				case NYE:
+					todos++;
+					break;
+				}
+			}
+		}
+		this.nrPassed = passes;
+		this.nrFailed = fails;
+		this.nrSkipped = skips;
+		this.nrTodo = todos;
+		this.total = this.nrPassed + this.nrFailed + this.nrSkipped + this.nrTodo;
+    }
+    
 	public int getPassed() {
-		// TODO Auto-generated method stub
-		return 60;
+		return this.nrPassed;
+	}
+	
+	public int getFailed() {
+		return this.nrFailed;
 	}
 
 	public int getSkipped() {
-		// TODO Auto-generated method stub
-		return 10;
+		return this.nrSkipped;
 	}
 
 	public int getToDo() {
-		// TODO Auto-generated method stub
-		return 10;
+		return this.nrTodo;
 	}
 
 	public int getTotal() {
-		// TODO Auto-generated method stub
-		return 100;
+		return this.total;
 	}
 
 }
