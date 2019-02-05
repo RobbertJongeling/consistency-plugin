@@ -57,10 +57,10 @@ padding: 2px 4px;
 }
 
 /* eclipse complains, but browser doesn't. */
-input[value="PASS"]{ background-color: #97f477; }​
-input[value="FAIL"]{ background-color: #f88676; }​
-input[value="SKIP"]{ background-color: #FFBF00; }​
-input[value="MUTE"]{ background-color: #FFBF00; }​
-input[value="NYE"]{ background-color: #00FFFF; }​
+input[value="PASS"]{ background-color: #97f477; }
+input[value="FAIL"]{ background-color: #f88676; }
+input[value="SKIP"]{ background-color: #FFBF00; }
+input[value="MUTE"]{ background-color: #FFBF00; }
+input[value="NYE"]{ background-color: #00FFFF; }
 input[value=""][readonly="readonly"]{background-color:grey; }
 
