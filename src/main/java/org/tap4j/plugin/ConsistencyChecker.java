@@ -163,19 +163,24 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 		if (isPerformChecker(build)) {
 			logger.println("Consistency Checking: START");
 			//TODO implement
-			//Stub: //TODO stub first!
+			//Stub:
 			logger.println("Placeholder, for now we only copy the config");
 			
 			//copying the config from last build (or default place) to new build
 			//oldPath is previous build, or, if not exists, the default
-//			FilePath oldPath = new FilePath(new File(Jenkins.getInstance().getRootDir(), "/consistencyChecks.xml"));
-			FilePath oldPath = new FilePath(new File(build.getRootDir(), "/consistencyChecks.xml"));
+			FilePath oldPath = null;
+			
 			if(build.getPreviousBuild() != null) {
 				File file = new File(build.getPreviousBuild().getRootDir().getAbsolutePath() + "/" + consistencyFileName);
 				if(file.exists()) {
 					oldPath = new FilePath(file);					
 				} 
-			}
+			} else {
+				logger.println("previous build is null, so copying the config file in default location");
+				logger.println("checking in: ");
+				oldPath = new FilePath(new File(build.getParent().getRootDir(), ("/" + consistencyFileName)));
+			}			
+			
 			File newFile = new File(build.getRootDir().getAbsolutePath() + "/" + consistencyFileName);
 			FilePath newPath = new FilePath(newFile);
 			
@@ -267,8 +272,7 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 				logger.println("Found matching files but did not find any TAP results.");
 				return Boolean.TRUE;
 			}
-			logger.println("hardcoding result success");
-			build.setResult(Result.SUCCESS); //TODO remove
+
 			logger.println("Consistency Checking: FINISH");
 		} else {
 			logger.println("Build result is not better or equal unstable. Skipping TAP publisher.");

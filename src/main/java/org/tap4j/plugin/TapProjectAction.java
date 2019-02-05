@@ -423,7 +423,20 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 				}
 			}
 		} else {
-			toReturn.add("config is null");
+			XmlFile configFile = getConfigFile();
+			if(configFile.exists()) {
+				TapProjectAction tpa = null;
+				try {
+					tpa = (TapProjectAction) configFile.unmarshal(tpa);
+					config = tpa.getConfig();
+					//TODO fix this uglyness
+					return getConsistencyChecks();
+				} catch (IOException e) {
+					toReturn.add("config is not a valid file");
+				}
+			} else {
+				toReturn.add("config is null");
+			}
 		}
 		return toReturn;
 	}

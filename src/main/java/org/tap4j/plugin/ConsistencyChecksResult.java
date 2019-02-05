@@ -21,6 +21,7 @@ import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.TapProjectAction.Entry;
 
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.XmlFile;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
@@ -71,6 +72,7 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 	}
 	
 	public String getConsistencyChecks() {
+		//TODO? 
 		return "hello world";
 	}
 
@@ -126,6 +128,10 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
         return name;
     }
 	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
 	public XmlFile getResultsFile() {
 //		return resultsFile;
 		return new XmlFile(new File(this.getResultsFilePath()));
@@ -148,6 +154,14 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 
 	public void setConfig(Config config) {
 		this.config = config;
+	}
+	
+	public void setResultsFilePath(String rfp) {
+		this.resultsFilePath = rfp;
+	}
+	
+	public void setResultsFilePath(FilePath rfp) {
+		this.resultsFilePath = rfp.getRemote();
 	}
 	
 	public HttpResponse doConfigSubmit(StaplerRequest req) throws ServletException, IOException {

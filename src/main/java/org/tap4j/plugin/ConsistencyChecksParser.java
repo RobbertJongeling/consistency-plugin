@@ -34,38 +34,31 @@ public class ConsistencyChecksParser {
 	private PrintStream logger;
 	private static final Logger log = Logger.getLogger(ConsistencyChecksParser.class.getName());
 
-	public ConsistencyChecksResult parse(FilePath results, Run build, PrintStream logger) {
+	public ConsistencyChecksResult parse(FilePath results, Run build, PrintStream logger) throws IOException {
 		this.parseErrors = false;
 		this.hasFailedTests = false;
 		this.logger = logger;
-		final List<Entry> checkSets = new LinkedList<Entry>();
 		
-		String ccFilePath = "";
+		ConsistencyChecksResult checksResult = null;
 		
 		if(results == null) {
 			log("No Consistency Checks found. Returning empty checks results.");
+			checksResult = new ConsistencyChecksResult("", "", build, new Config(new LinkedList<Entry>()));
 		} else {
-			ccFilePath = results.getRemote();
 			XmlFile ccFile = new XmlFile(new File(results.getRemote()));
-			
-			try {
-				log("printing xmlfile as string " + ccFile.getFile().getAbsolutePath());
-				log(ccFile.asString());
-			} catch (IOException e) {
-				log("logging ccFile as String failed miserably. Just give up all hope.");
+									
+			// This reads the XML file into the checksResult object.
+			if(ccFile.exists()) {
+				try {
+					checksResult = (ConsistencyChecksResult) ccFile.unmarshal(checksResult);
+				} catch (Exception ex) {// could also be TapProjectAction.
+					TapProjectAction tpa = null;
+					tpa = (TapProjectAction) ccFile.unmarshal(tpa);
+					checksResult = new ConsistencyChecksResult("Consistency Checks Results", results.getRemote(), build, tpa.getConfig());
+				}
 			}
 		}
 		
-		log("adding dummy check result for testing");//TODO remove ofc.
-//		checkSets.add(new CheckResult(new ConsistencyRuleEntry("test1", "test2", "strict", false, false ), true, "it works"));
-//		checkSets.add(new CheckResult(new ConsistencyRuleEntry("test3", "test4", "loose", false, false ), false, "it doesn't work"));
-		
-		checkSets.add(new ConsistencyRuleEntry("test1", "test2", "strict", false, false, CheckResult.PASS, "it works" ));
-		checkSets.add(new ConsistencyRuleEntry("test3", "test4", "loose", false, true, CheckResult.FAIL, "it doesn't work"));
-		checkSets.add(new ConsistencyRuleEntry("test5", "test6", "medium", true, false, CheckResult.NYE, "not yet executed"));
-		checkSets.add(new ConsistencyRuleEntry("test7", "test8", "medium", true, true, CheckResult.PASS, "it works"));
-		
-		final ConsistencyChecksResult checksResult = new ConsistencyChecksResult("Consistency Checks Results", ccFilePath, build, new Config(checkSets));
 		return checksResult;
 	}
 
