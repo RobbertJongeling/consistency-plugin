@@ -498,8 +498,19 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		private String strictness;
 		private boolean mute;
 		private boolean skip;
-		private String result;
+		private CheckResult result;
 		private String resultText;
+		
+//		@DataBoundConstructor
+		public ConsistencyRuleEntry(String A, String B, String strictness, boolean mute, boolean skip, CheckResult result, String resultText) {
+			this.A = A;
+			this.B = B;
+			this.strictness = strictness;
+			this.mute = mute;
+			this.skip = skip;
+			this.result = result;
+			this.resultText = resultText;
+		}
 		
 		@DataBoundConstructor
 		public ConsistencyRuleEntry(String A, String B, String strictness, boolean mute, boolean skip, String result, String resultText) {
@@ -508,7 +519,28 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			this.strictness = strictness;
 			this.mute = mute;
 			this.skip = skip;
-			this.result = result;
+			
+			switch(result) {
+			case "PASS":
+				this.result = CheckResult.PASS;
+				break;
+			case "FAIL":
+				this.result = CheckResult.FAIL;
+				break;
+			case "NYE":
+				this.result = CheckResult.NYE;
+				break;
+			case "SKIP":
+				this.result = CheckResult.SKIP;
+				break;
+			case "MUTE":
+				this.result = CheckResult.MUTE;
+				break;
+			default: 
+				this.result = CheckResult.NYE;
+				break;
+			}
+
 			this.resultText = resultText;
 		}
 
@@ -532,7 +564,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			return skip;
 		}
 		
-		public String getResult() {
+		public CheckResult getResult() {
 			return result;
 		}
 		
@@ -540,6 +572,10 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			return resultText;
 		}
 
+		public boolean hasResult() {
+			return result == CheckResult.PASS || result == CheckResult.FAIL;
+		}
+		
 		@Extension
 		public static final class DescriptorImpl extends Descriptor<Entry> {
 			@Override

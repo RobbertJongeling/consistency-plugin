@@ -27,5 +27,5 @@ import org.tap4j.plugin.TapProjectAction.ConsistencyRuleEntry;
 //}
 
 public enum CheckResult {
-	FAIL, PASS, NYE;
+	FAIL, PASS, NYE, SKIP, MUTE;
 }

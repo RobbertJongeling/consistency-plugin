@@ -60,10 +60,10 @@ public class ConsistencyChecksParser {
 //		checkSets.add(new CheckResult(new ConsistencyRuleEntry("test1", "test2", "strict", false, false ), true, "it works"));
 //		checkSets.add(new CheckResult(new ConsistencyRuleEntry("test3", "test4", "loose", false, false ), false, "it doesn't work"));
 		
-		checkSets.add(new ConsistencyRuleEntry("test1", "test2", "strict", false, false, "PASS", "it works" ));
-		checkSets.add(new ConsistencyRuleEntry("test3", "test4", "loose", false, true, "FAIL", "it doesn't work"));
-		checkSets.add(new ConsistencyRuleEntry("test5", "test6", "medium", true, false, "NYE", "not yet executed"));
-		checkSets.add(new ConsistencyRuleEntry("test7", "test8", "medium", true, true, "PASS", "it works"));
+		checkSets.add(new ConsistencyRuleEntry("test1", "test2", "strict", false, false, CheckResult.PASS, "it works" ));
+		checkSets.add(new ConsistencyRuleEntry("test3", "test4", "loose", false, true, CheckResult.FAIL, "it doesn't work"));
+		checkSets.add(new ConsistencyRuleEntry("test5", "test6", "medium", true, false, CheckResult.NYE, "not yet executed"));
+		checkSets.add(new ConsistencyRuleEntry("test7", "test8", "medium", true, true, CheckResult.PASS, "it works"));
 		
 		final ConsistencyChecksResult checksResult = new ConsistencyChecksResult("Consistency Checks Results", ccFilePath, build, new Config(checkSets));
 		return checksResult;
