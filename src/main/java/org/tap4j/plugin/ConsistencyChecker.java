@@ -211,22 +211,22 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 				t.printStackTrace(logger);
 			}
 
-            TapTestResultAction trAction = build.getAction(TapTestResultAction.class);
-			boolean appending = false;
+//            TapTestResultAction trAction = build.getAction(TapTestResultAction.class);
+//			boolean appending = false;
+//    
+//            if (trAction == null) {
+//                appending = false;
+//                logger.println("no taptestresultaction yet, appending false");
+//                trAction = new TapTestResultAction(build, checksResult);
+//            } else {
+//                appending = true;
+//                logger.println("taptestresultaction existing, appending true");
+//                trAction.mergeResult(checksResult);
+//            }
     
-            if (trAction == null) {
-                appending = false;
-                logger.println("no taptestresultaction yet, appending false");
-                trAction = new TapTestResultAction(build, checksResult);
-            } else {
-                appending = true;
-                logger.println("taptestresultaction existing, appending true");
-                trAction.mergeResult(checksResult);
-            }
-    
-            if (!appending) {
-                build.addAction(trAction);
-            }
+//            if (!appending) {
+//                build.addAction(trAction);
+//            }
 
 			if (checksResult.getConfig().getEntries().size() > 0 || checksResult.getParseErrorTestSets().size() > 0) {
 				// create an individual report for all of the results and add it to
@@ -239,7 +239,7 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 					build.addAction(action);
 				} else {
 					logger.println("merging result NYI!");
-					appending = true;
+//					appending = true;
 //					action.mergeResult(checksResult); //TODO
 				}
 
@@ -259,14 +259,15 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 					}
 				}
 
-				if (appending) {
+//				if (appending) {
 					build.save();
-				}
+//				}
 
 			} else {
 				logger.println("Found matching files but did not find any TAP results.");
 				return Boolean.TRUE;
 			}
+			logger.println("hardcoding result success");
 			build.setResult(Result.SUCCESS); //TODO remove
 			logger.println("Consistency Checking: FINISH");
 		} else {
