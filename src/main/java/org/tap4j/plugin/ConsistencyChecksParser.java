@@ -51,6 +51,7 @@ public class ConsistencyChecksParser {
 			if(ccFile.exists()) {
 				try {
 					checksResult = (ConsistencyChecksResult) ccFile.unmarshal(checksResult);
+					checksResult.setResultsFilePath(results);
 				} catch (Exception ex) {// could also be TapProjectAction.
 					TapProjectAction tpa = null;
 					tpa = (TapProjectAction) ccFile.unmarshal(tpa);

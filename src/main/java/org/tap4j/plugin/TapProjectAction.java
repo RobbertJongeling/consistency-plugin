@@ -577,8 +577,16 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			return skip;
 		}
 		
+		public void setResult(CheckResult newResult) {
+			this.result = newResult;
+		}
+		
 		public CheckResult getResult() {
 			return result;
+		}
+		
+		public void setResultText(String newResultText) {
+			this.resultText = newResultText;
 		}
 		
 		public String getResultText() {

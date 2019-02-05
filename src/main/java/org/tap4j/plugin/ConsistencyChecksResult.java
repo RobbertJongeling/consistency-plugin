@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -34,11 +35,11 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 	
     private static final long serialVersionUID = 4343399327336076951L;
 
-    private static final Logger LOGGER = Logger.getLogger(TapResult.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ConsistencyChecksResult.class.getName());
 
 	private String name;
 	private String resultsFilePath;
-	private Run owner;
+	private Run<?, ?>  build;
 	private Boolean showOnlyFailures;
 	//private List<ConsistencyRuleEntry> checkResults;
 	private Config config;
@@ -49,10 +50,10 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 	private int nrTodo;
 	private int total;
 
-	public ConsistencyChecksResult(String name, String resultsFilePath, Run owner, Config config /*List<ConsistencyRuleEntry> checkResults*/) {
+	public ConsistencyChecksResult(String name, String resultsFilePath, Run<?, ?> build, Config config /*List<ConsistencyRuleEntry> checkResults*/) {
 		this.name = name;
 		this.resultsFilePath = resultsFilePath;
-		this.owner = owner;
+		this.build = build;
 //		this.checkResults = new LinkedList<ConsistencyRuleEntry>();
 //		this.checkResults.addAll(checkResults);
 //		this.config = new Config(this.checkResults);
@@ -76,8 +77,8 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 		return "hello world";
 	}
 
-	public void setOwner(Run owner) {
-		this.owner = owner;		
+	public void setOwner(Run<?, ?> build) {
+		this.build = build;		
 	}
 
 	public void setShowOnlyFailures(Boolean showOnlyFailures) {
@@ -139,13 +140,16 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 	
 	public String getResultsFilePath() {
 		if(resultsFilePath == null || resultsFilePath.equals("")) {
-			resultsFilePath = owner.getRootDir() + "/consistencyChecks.xml";
+			//TODO?
+			LOGGER.log(Level.SEVERE, "resultsFilePath is null or empty String, can not save ");
+			resultsFilePath = "";
 		}
+		
 		return resultsFilePath;
 	}
 	
-	public Run getOwner() {
-        return this.owner;
+	public Run<?, ?> getOwner() {
+        return this.build;
     }
 	
 	public Config getConfig() {
@@ -173,6 +177,31 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 		return FormApply.success(".");
 	}
 
+	public boolean saveConfig(FilePath dest) {
+		boolean success;
+		XmlFile destFile = new XmlFile(new File(dest.getRemote()));
+		try {
+			destFile.write(this);
+			success = true;
+		} catch (IOException e) {
+			success = false;
+		}
+		return success;
+	}
+//	
+//	XmlFile ccFile = new XmlFile(new File(results.getRemote()));
+//	
+//	// This reads the XML file into the checksResult object.
+//	if(ccFile.exists()) {
+//		try {
+//			checksResult = (ConsistencyChecksResult) ccFile.unmarshal(checksResult);
+//		} catch (Exception ex) {// could also be TapProjectAction.
+//			TapProjectAction tpa = null;
+//			tpa = (TapProjectAction) ccFile.unmarshal(tpa);
+//			checksResult = new ConsistencyChecksResult("Consistency Checks Results", results.getRemote(), build, tpa.getConfig());
+//		}
+//	}
+	
     /*
      * (non-Javadoc)
      * 

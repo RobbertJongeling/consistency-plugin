@@ -39,6 +39,7 @@ import org.apache.commons.lang.BooleanUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.tap4j.model.Plan;
 import org.tap4j.model.TestSet;
+import org.tap4j.plugin.TapProjectAction.Config;
 import org.tap4j.plugin.TapProjectAction.ConsistencyRuleEntry;
 import org.tap4j.plugin.TapProjectAction.Entry;
 import org.tap4j.plugin.model.CheckResult;
@@ -162,7 +163,7 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 		final PrintStream logger = listener.getLogger();
 		if (isPerformChecker(build)) {
 			logger.println("Consistency Checking: START");
-			//TODO implement
+			
 			//Stub:
 			logger.println("Placeholder, for now we only copy the config");
 			
@@ -173,27 +174,34 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 			if(build.getPreviousBuild() != null) {
 				File file = new File(build.getPreviousBuild().getRootDir().getAbsolutePath() + "/" + consistencyFileName);
 				if(file.exists()) {
-					oldPath = new FilePath(file);					
+					oldPath = new FilePath(file);
 				} 
 			} else {
 				logger.println("previous build is null, so copying the config file in default location");
 				logger.println("checking in: ");
 				oldPath = new FilePath(new File(build.getParent().getRootDir(), ("/" + consistencyFileName)));
-			}			
+			}
 			
 			File newFile = new File(build.getRootDir().getAbsolutePath() + "/" + consistencyFileName);
 			FilePath newPath = new FilePath(newFile);
 			
-			logger.println("Copying from " + oldPath.toString() + " to " + newPath.toString());
-			oldPath.copyTo(newPath);
-						
-			//end of stub-stub
+			//Stub: copy the config from old to new. 
+			logger.println("old and new paths are: " + oldPath.toString() + " to " + newPath.toString());
+//			oldPath.copyTo(newPath);
 			
+			ConsistencyChecksResult ccr = loadResults(oldPath, build, logger);
+			ConsistencyChecksRunner crr = new ConsistencyChecksRunner(ccr, logger);
+			crr.runChecks();
+			crr.saveResults(newPath);
+			
+			
+			logger.println("Consistency Checking: DONE");
 			logger.println("Displaying Consistency Checking Results: START");
 			
 //			logger.println("checking for results in workspace: " + workspace.toString());
-			logger.println("checking for results in " + build.getRootDir().getAbsolutePath() + "/" + consistencyFileName);
+//			logger.println("checking for results in " + build.getRootDir().getAbsolutePath() + "/" + consistencyFileName);
 			FilePath results = new FilePath(new File(build.getRootDir().getAbsolutePath() + "/" + consistencyFileName));
+			logger.println("results path is: " + results.toString());
 
 //			boolean filesSaved = saveReports(workspace, ConsistencyChecker.getReportsDirectory(build), results, logger);
 //			if (!filesSaved) {
@@ -277,7 +285,7 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 		} else {
 			logger.println("Build result is not better or equal unstable. Skipping TAP publisher.");
 		}
-		return Boolean.TRUE;
+		return Boolean.TRUE;		
 	}
 
 	/**
