@@ -62,5 +62,5 @@ input[value="FAIL"]{ background-color: #f88676; }
 input[value="SKIP"]{ background-color: #FFBF00; }
 input[value="MUTE"]{ background-color: #FFBF00; }
 input[value="NYE"]{ background-color: #00FFFF; }
-input[value=""][readonly="readonly"]{background-color:grey; }
+input:not([value])[readonly="readonly"]{background-color:lightgray; }
 
