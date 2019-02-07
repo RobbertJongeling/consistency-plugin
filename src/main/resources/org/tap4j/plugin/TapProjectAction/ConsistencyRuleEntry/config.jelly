@@ -27,11 +27,17 @@ THE SOFTWARE.
 	<f:entry field="resultText" title="Comments:">
 		<f:readOnlyTextbox/>
 	</f:entry>
-    <f:entry field="A" title="A">
-        <f:textbox/>
+	<f:entry field="fileA" title="File of A">
+          <f:select />
     </f:entry>
-    <f:entry field="B" title="B">
-        <f:textbox/>
+    <f:entry field="fqnA" title="FQN of A">
+        <f:select/>
+    </f:entry>
+    <f:entry field="fileB" title="File of B">
+        <f:select/>
+    </f:entry>
+    <f:entry field="fqnB" title="FQN of B">
+        <f:select/>
     </f:entry>
     <f:entry field="strictness" title="Strictness">
           <f:select />

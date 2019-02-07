@@ -23,6 +23,9 @@
  */
 package org.tap4j.plugin.util;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.tap4j.model.Directive;
 import org.tap4j.model.TestResult;
 import org.tap4j.util.DirectiveValues;
@@ -94,5 +97,13 @@ public final class Util {
             r = true;
         }
         return r;
+    }
+    
+    public static List<String> getAllModelFiles() {
+    	List<String> toReturn = new LinkedList<String>();
+    	toReturn.add("file1");
+    	toReturn.add("file2");
+    	toReturn.add("file3");
+    	return toReturn;
     }
 }

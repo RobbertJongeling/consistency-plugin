@@ -47,9 +47,11 @@ import org.jfree.chart.JFreeChart;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.HttpResponse;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.tap4j.plugin.model.CheckResult;
+import org.tap4j.plugin.model.ModelElement;
 import org.tap4j.plugin.util.GraphHelper;
 import org.tap4j.plugin.util.Util;
 
@@ -506,8 +508,8 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 
 	public static final class ConsistencyRuleEntry extends Entry {
 
-		private String A;
-		private String B;
+		private ModelElement a;
+		private ModelElement b;
 		private String strictness;
 		private boolean mute;
 		private boolean skip;
@@ -515,9 +517,9 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		private String resultText;
 		
 //		@DataBoundConstructor
-		public ConsistencyRuleEntry(String A, String B, String strictness, boolean mute, boolean skip, CheckResult result, String resultText) {
-			this.A = A;
-			this.B = B;
+		public ConsistencyRuleEntry(ModelElement a, ModelElement b, String strictness, boolean mute, boolean skip, CheckResult result, String resultText) {
+			this.a = a;
+			this.b = b;
 			this.strictness = strictness;
 			this.mute = mute;
 			this.skip = skip;
@@ -526,9 +528,9 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		}
 		
 		@DataBoundConstructor
-		public ConsistencyRuleEntry(String A, String B, String strictness, boolean mute, boolean skip, String result, String resultText) {
-			this.A = A;
-			this.B = B;
+		public ConsistencyRuleEntry(String fileA, String fqnA, String fileB, String fqnB, String strictness, boolean mute, boolean skip, String result, String resultText) {
+			this.a = new ModelElement(fileA, fqnA);
+			this.b = new ModelElement(fileB, fqnB);
 			this.strictness = strictness;
 			this.mute = mute;
 			this.skip = skip;
@@ -557,12 +559,28 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			this.resultText = resultText;
 		}
 
-		public String getA() {
-			return A;
+		public ModelElement getA() {
+			return a;
 		}
 
-		public String getB() {
-			return B;
+		public ModelElement getB() {
+			return b;
+		}
+		
+		public String getFileA() {
+			return a.getFile();
+		}
+		
+		public String getFqnA() {
+			return a.getFqn();
+		}
+		
+		public String getFileB() {
+			return b.getFile();
+		}
+		
+		public String getFqnB() {
+			return a.getFqn();
 		}
 
 		public String getStrictness() {
@@ -607,11 +625,45 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			public ListBoxModel doFillStrictnessItems() {
 				return new ListBoxModel().add("strict").add("medium").add("loose");
 			}
+			
+			//TODO technical debt. fix this uglyness of code duplication
+			public ListBoxModel doFillFileAItems() {
+				ListBoxModel toReturn = new ListBoxModel();
+				List<String> allModelFiles = Util.getAllModelFiles();
+				for(String s : allModelFiles) {
+					toReturn.add(s);
+				}
+				return toReturn;
+			}
+			
+			public ListBoxModel doFillFileBItems() {
+				return doFillFileAItems();
+			}
+			
+			public ListBoxModel doFillFqnAItems(@QueryParameter String fileA) {
+				ListBoxModel toReturn = new ListBoxModel();
+				
+				for(String s : Arrays.asList("A", "B", "C")) {
+					toReturn.add(fileA + ":" + s);
+				}
+				
+				return toReturn;
+			}
+			
+			public ListBoxModel doFillFqnBItems(@QueryParameter String fileB) {
+				ListBoxModel toReturn = new ListBoxModel();
+				
+				for(String s : Arrays.asList("A", "B", "C")) {
+					toReturn.add(fileB + ":" + s);
+				}
+				
+				return toReturn;
+			}
 		}
 		
 		@Override
 		public String toString() {
-			return A + " " + strictness + " consistent with " + B + ". Check is "
+			return a.getFqn() + " from file " + a.getFile() + " " + strictness + " consistent with " + b.getFqn() + " from file " + b.getFile() + ". Check is "
 			+ (mute ? "" : "not ") + "muted and " + (skip ? "" : "not ") + "skipped.";
 		}
 	}
