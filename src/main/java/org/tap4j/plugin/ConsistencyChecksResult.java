@@ -134,7 +134,6 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 	}
 	
 	public XmlFile getResultsFile() {
-//		return resultsFile;
 		return new XmlFile(new File(this.getResultsFilePath()));
 	}
 	

@@ -17,7 +17,7 @@
 			<f:form action="configSubmit" name="config" method="post">
                 <j:set var="instance" value="${it}"/>
                 <j:set var="descriptor" value="${it.descriptor}"/>
-                <f:optionalProperty field="config" title="Show Results" default="true"/>
+                <f:property field="config"/>
                 <f:bottomButtonBar>
                     <f:submit value="${%Save}"/>
                     <f:apply/>

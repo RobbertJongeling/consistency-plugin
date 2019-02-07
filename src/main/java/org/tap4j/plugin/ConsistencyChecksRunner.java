@@ -25,15 +25,8 @@ public class ConsistencyChecksRunner {
 		for(Entry e : config.getEntries()) {
 			if (e instanceof ConsistencyRuleEntry) {
 				ConsistencyRuleEntry cre = (ConsistencyRuleEntry) e;
-				
-				if(! cre.getSkip()) {
-					//stub: set result of each test to pass 
-					cre.setResult(CheckResult.PASS);
-					cre.setResultText("Stub: for now setting everything to pass, unless the test is skipped");
-				} else {
-					cre.setResult(CheckResult.SKIP);
-					cre.setResultText("Stub: for now just writing this here if test was skipped");
-				}
+
+				execute(cre);
 			}
 		}
 		
@@ -46,6 +39,21 @@ public class ConsistencyChecksRunner {
 			logger.println("Check results saved OK");
 		} else {
 			logger.println("ERROR in saving Consistency Checks Results");
+		}
+	}
+	
+	/**
+	 * executes this ConsistencyRuleEntry and sets the result appropriately.
+	 * @param cre
+	 */
+	private void execute(ConsistencyRuleEntry cre) {
+		//stub: set result of each test to pass, except skips
+		if(! cre.getSkip()) {
+			cre.setResult(CheckResult.PASS);
+			cre.setResultText("Stub: for now setting everything to pass, unless the test is skipped");
+		} else {
+			cre.setResult(CheckResult.SKIP);
+			cre.setResultText("Stub: for now just writing this here if test was skipped");
 		}
 	}
 }
