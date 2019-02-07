@@ -669,7 +669,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 					allModelFiles = (List<String>) allModels.unmarshal(allModelFiles);
 				} catch (IOException e) {
 					try {
-						Indexer.indexFilesAndElements();
+						Indexer.indexFilesAndElements(null);//TODO I think this can not work, since we have to access the workspace
 						return doFillFileItems();
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
@@ -707,7 +707,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 					modelElements = (Map<String, List<String>>) allModelElements.unmarshal(modelElements);
 				} catch (IOException e) {
 					try {
-						Indexer.indexFilesAndElements();
+						Indexer.indexFilesAndElements(null);//TODO this can't work
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();

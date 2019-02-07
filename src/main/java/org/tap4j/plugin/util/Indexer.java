@@ -8,19 +8,22 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.RegexFileFilter;
+
 import hudson.XmlFile;
 import hudson.model.Run;
 import jenkins.model.Jenkins;
 
 public final class Indexer {
 
-	public static void indexFilesAndElements() throws IOException {
+	public static void indexFilesAndElements(Run<?, ?> build) throws IOException {
 		XmlFile allModels = new XmlFile(new File(Jenkins.getInstance().getRootDir(), ("/allModels.xml")));
-		List<String> allModelsList = getAllModelFiles();
+		List<String> allModelsList = getAllModelFiles(build);
 		allModels.write(allModelsList);
 		XmlFile allModelElements = new XmlFile(new File(Jenkins.getInstance().getRootDir(), ("/allModelElements.xml")));
-		allModelElements.write(getAllModelElements(allModelsList));
-		
+		allModelElements.write(getAllModelElements(allModelsList, build));
 	}
 
 	/**
@@ -28,11 +31,22 @@ public final class Indexer {
      *TODO implement
      * @return
      */
-    public static List<String> getAllModelFiles() {
+    public static List<String> getAllModelFiles(Run<?, ?> build) {
     	List<String> toReturn = new LinkedList<String>();
-    	toReturn.add("file1");
-    	toReturn.add("file2");
-    	toReturn.add("file3");
+    	
+    	if(build == null) {
+        	toReturn.add("file1");
+        	toReturn.add("file2");
+        	toReturn.add("file3");    		
+    	} else {
+    		//TODO extend to other file extensions
+    		String location = build.getParent().getRootDir() + "/workspace/";
+    		File workspace = new File(location);
+    		for(File f : FileUtils.listFiles(workspace, new RegexFileFilter("(^.*uml)|(^.*slx)"), DirectoryFileFilter.DIRECTORY)) {
+    			toReturn.add(f.getAbsolutePath().substring(location.length()));
+    		}	
+    	}
+    	
     	return toReturn;
     }
     
@@ -41,11 +55,18 @@ public final class Indexer {
      *TODO implement
      * @return
      */
-    public static Map<String, List<String>> getAllModelElements(List<String> modelFiles) {
+    public static Map<String, List<String>> getAllModelElements(List<String> modelFiles, Run<?, ?> build) {
     	Map<String, List<String>> toReturn = new HashMap<>();    	
     	
-    	for(String mf : modelFiles) {
-    		toReturn.put(mf, Arrays.asList(mf+":element a", mf+":element b", mf+":element c"));
+    	if(build == null) {
+	    	for(String mf : modelFiles) {
+	    		toReturn.put(mf, Arrays.asList(mf+":element a", mf+":element b", mf+":element c"));
+	    	}
+    	} else {
+    		//TODO implement
+    		for(String mf : modelFiles) {
+	    		toReturn.put(mf, Arrays.asList(mf+":element a", mf+":element b", mf+":element c"));
+	    	}
     	}
     	
     	return toReturn;

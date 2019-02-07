@@ -168,7 +168,7 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 		final PrintStream logger = listener.getLogger();
 		if (isPerformChecker(build)) {
 			logger.println("Pre Cosistency Checking: START indexing files and elements");
-			Indexer.indexFilesAndElements();
+			Indexer.indexFilesAndElements(build);
 			logger.println("Pre Cosistency Checking: DONE indexing files and elements");
 			
 			logger.println("Consistency Checking: START");
