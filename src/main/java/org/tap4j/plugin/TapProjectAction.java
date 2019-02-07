@@ -626,7 +626,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 				return new ListBoxModel().add("strict").add("medium").add("loose");
 			}
 			
-			//TODO technical debt. fix this uglyness of code duplication
+			/* decided to revert back to textboxes for now, since this selection gives some problems, i.e. when to index.
 			public ListBoxModel doFillFileAItems() {
 				ListBoxModel toReturn = new ListBoxModel();
 				List<String> allModelFiles = Util.getAllModelFiles();
@@ -658,7 +658,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 				}
 				
 				return toReturn;
-			}
+			}*/
 		}
 		
 		@Override
