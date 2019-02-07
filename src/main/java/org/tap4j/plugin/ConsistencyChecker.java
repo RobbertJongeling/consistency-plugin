@@ -30,8 +30,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
@@ -45,6 +49,7 @@ import org.tap4j.plugin.TapProjectAction.Entry;
 import org.tap4j.plugin.model.CheckResult;
 import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.Constants;
+import org.tap4j.plugin.util.Indexer;
 
 import hudson.EnvVars;
 import hudson.Extension;
@@ -162,6 +167,10 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 			throws IOException, InterruptedException {
 		final PrintStream logger = listener.getLogger();
 		if (isPerformChecker(build)) {
+			logger.println("Pre Cosistency Checking: START indexing files and elements");
+			Indexer.indexFilesAndElements();
+			logger.println("Pre Cosistency Checking: DONE indexing files and elements");
+			
 			logger.println("Consistency Checking: START");
 			
 			//Stub:
@@ -523,4 +532,8 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 		}
 
 	}
+	
+
+    
+    
 }

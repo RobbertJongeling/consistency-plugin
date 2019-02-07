@@ -98,12 +98,4 @@ public final class Util {
         }
         return r;
     }
-    
-    public static List<String> getAllModelFiles() {
-    	List<String> toReturn = new LinkedList<String>();
-    	toReturn.add("file1");
-    	toReturn.add("file2");
-    	toReturn.add("file3");
-    	return toReturn;
-    }
 }

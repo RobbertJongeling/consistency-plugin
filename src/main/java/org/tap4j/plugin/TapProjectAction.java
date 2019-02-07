@@ -51,8 +51,11 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.tap4j.plugin.model.CheckResult;
+import org.tap4j.plugin.model.CheckStrictness;
+import org.tap4j.plugin.model.CheckType;
 import org.tap4j.plugin.model.ModelElement;
 import org.tap4j.plugin.util.GraphHelper;
+import org.tap4j.plugin.util.Indexer;
 import org.tap4j.plugin.util.Util;
 
 import java.io.File;
@@ -510,16 +513,18 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 
 		private ModelElement a;
 		private ModelElement b;
-		private String strictness;
+		private CheckType type;
+		private CheckStrictness strictness;
 		private boolean mute;
 		private boolean skip;
 		private CheckResult result;
 		private String resultText;
 		
 //		@DataBoundConstructor
-		public ConsistencyRuleEntry(ModelElement a, ModelElement b, String strictness, boolean mute, boolean skip, CheckResult result, String resultText) {
+		public ConsistencyRuleEntry(ModelElement a, ModelElement b, CheckType type, CheckStrictness strictness, boolean mute, boolean skip, CheckResult result, String resultText) {
 			this.a = a;
 			this.b = b;
+			this.type = type;
 			this.strictness = strictness;
 			this.mute = mute;
 			this.skip = skip;
@@ -528,10 +533,27 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		}
 		
 		@DataBoundConstructor
-		public ConsistencyRuleEntry(String fileA, String fqnA, String fileB, String fqnB, String strictness, boolean mute, boolean skip, String result, String resultText) {
+		public ConsistencyRuleEntry(String fileA, String fqnA, String fileB, String fqnB, String type, String strictness, boolean mute, boolean skip, String result, String resultText) {
 			this.a = new ModelElement(fileA, fqnA);
 			this.b = new ModelElement(fileB, fqnB);
-			this.strictness = strictness;
+						
+			switch(type) {
+			case "REFINEMENT":
+				this.type = CheckType.REFINEMENT;
+				break;
+			case "EQUIVALENCE":
+				this.type = CheckType.EQUIVALENCE;
+				break;
+			}
+			
+			switch(strictness) {
+			case "LOOSE":
+				this.strictness = CheckStrictness.LOOSE;
+				break;
+			case "STRICT":
+				this.strictness = CheckStrictness.STRICT;
+			}
+			
 			this.mute = mute;
 			this.skip = skip;
 			
@@ -582,8 +604,12 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		public String getFqnB() {
 			return a.getFqn();
 		}
+		
+		public CheckType getType() {
+			return type;
+		}
 
-		public String getStrictness() {
+		public CheckStrictness getStrictness() {
 			return strictness;
 		}
 
@@ -623,47 +649,86 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			}
 
 			public ListBoxModel doFillStrictnessItems() {
-				return new ListBoxModel().add("strict").add("medium").add("loose");
+				return new ListBoxModel().add("LOOSE").add("STRICT");
 			}
 			
-			/* decided to revert back to textboxes for now, since this selection gives some problems, i.e. when to index.
-			public ListBoxModel doFillFileAItems() {
-				ListBoxModel toReturn = new ListBoxModel();
-				List<String> allModelFiles = Util.getAllModelFiles();
+			public ListBoxModel doFillTypeItems() {
+				return new ListBoxModel().add("REFINEMENT").add("EQUIVALENCE");
+			}
+			
+			//TODO techical debt. Fix ugly code duplication and hardcoded file names
+			XmlFile allModels = new XmlFile(new File(Jenkins.getInstance().getRootDir(), ("/allModels.xml")));
+			XmlFile allModelElements = new XmlFile(new File(Jenkins.getInstance().getRootDir(), ("/allModelElements.xml")));
+			
+			@SuppressWarnings("unchecked")
+			public ListBoxModel doFillFileItems() {
+				ListBoxModel toReturn = new ListBoxModel();				
+				
+				List<String> allModelFiles = new LinkedList<String>();
+				try {
+					allModelFiles = (List<String>) allModels.unmarshal(allModelFiles);
+				} catch (IOException e) {
+					try {
+						Indexer.indexFilesAndElements();
+						return doFillFileItems();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}				
+								
 				for(String s : allModelFiles) {
 					toReturn.add(s);
 				}
 				return toReturn;
 			}
 			
-			public ListBoxModel doFillFileBItems() {
-				return doFillFileAItems();
+			public ListBoxModel doFillFileAItems() {
+				return doFillFileItems();
 			}
 			
+			public ListBoxModel doFillFileBItems() {
+				return doFillFileItems();
+			}					
+			
 			public ListBoxModel doFillFqnAItems(@QueryParameter String fileA) {
-				ListBoxModel toReturn = new ListBoxModel();
-				
-				for(String s : Arrays.asList("A", "B", "C")) {
-					toReturn.add(fileA + ":" + s);
-				}
-				
-				return toReturn;
+				return getFqnListBoxModel(fileA);
 			}
 			
 			public ListBoxModel doFillFqnBItems(@QueryParameter String fileB) {
+				return getFqnListBoxModel(fileB);
+			}
+			
+			public ListBoxModel getFqnListBoxModel(String file) {
 				ListBoxModel toReturn = new ListBoxModel();
 				
-				for(String s : Arrays.asList("A", "B", "C")) {
-					toReturn.add(fileB + ":" + s);
+				Map<String, List<String>> modelElements = new HashMap<>();
+				try {
+					modelElements = (Map<String, List<String>>) allModelElements.unmarshal(modelElements);
+				} catch (IOException e) {
+					try {
+						Indexer.indexFilesAndElements();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					return getFqnListBoxModel(file);
+				}			
+				
+				List<String> mes = modelElements.get(file);
+				if(mes != null) {
+					for(String me : mes) {
+						toReturn.add(me);
+					}
 				}
 				
 				return toReturn;
-			}*/
+			}
 		}
 		
 		@Override
 		public String toString() {
-			return a.getFqn() + " from file " + a.getFile() + " " + strictness + " consistent with " + b.getFqn() + " from file " + b.getFile() + ". Check is "
+			return a.getFqn() + " from file " + a.getFile() + " " + strictness + " " + type + " consistent with " + b.getFqn() + " from file " + b.getFile() + ". Check is "
 			+ (mute ? "" : "not ") + "muted and " + (skip ? "" : "not ") + "skipped.";
 		}
 	}

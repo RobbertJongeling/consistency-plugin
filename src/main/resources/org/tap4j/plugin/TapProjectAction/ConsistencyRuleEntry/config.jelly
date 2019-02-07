@@ -28,18 +28,21 @@ THE SOFTWARE.
 		<f:readOnlyTextbox/>
 	</f:entry>
 	<f:entry field="fileA" title="File of A">
-          <f:textbox />
+          <f:select />
     </f:entry>
     <f:entry field="fqnA" title="FQN of A">
-        <f:textbox/>
+        <f:select/>
     </f:entry>
     <f:entry field="fileB" title="File of B">
-        <f:textbox/>
+        <f:select/>
     </f:entry>
     <f:entry field="fqnB" title="FQN of B">
-        <f:textbox/>
+        <f:select/>
     </f:entry>
     <f:entry field="strictness" title="Strictness">
+          <f:select />
+    </f:entry>
+    <f:entry field="type" title="Type">
           <f:select />
     </f:entry>
     <f:entry title="">
