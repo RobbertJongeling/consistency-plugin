@@ -83,7 +83,7 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 	private final Boolean failIfChecksFail;
 	private final Boolean showOnlyFailures;
 	private String testResults;
-	
+
 	private static final String consistencyFileName = "consistencyChecks.xml";
 
 	@DataBoundConstructor
@@ -170,47 +170,50 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 			logger.println("Pre Cosistency Checking: START indexing files and elements");
 			Indexer.indexFilesAndElements(build);
 			logger.println("Pre Cosistency Checking: DONE indexing files and elements");
-			
+
 			logger.println("Consistency Checking: START");
-			
-			//Stub:
+
+			// Stub:
 			logger.println("Placeholder, for now we only copy the config");
-			
-			//copying the config from last build (or default place) to new build
-			//oldPath is previous build, or, if not exists, the default
+
+			// copying the config from last build (or default place) to new build
+			// oldPath is previous build, or, if not exists, the default
 			FilePath oldPath = null;
-			
-			if(build.getPreviousBuild() != null) {
-				File file = new File(build.getPreviousBuild().getRootDir().getAbsolutePath() + "/" + consistencyFileName);
-				if(file.exists()) {
+
+			if (build.getPreviousBuild() != null) {
+				File file = new File(
+						build.getPreviousBuild().getRootDir().getAbsolutePath() + "/" + consistencyFileName);
+				if (file.exists()) {
 					oldPath = new FilePath(file);
-				} 
-			} else {
+				}
+			}
+			if (oldPath == null) {
 				logger.println("previous build is null, so copying the config file in default location");
 				logger.println("checking in: ");
 				oldPath = new FilePath(new File(build.getParent().getRootDir(), ("/" + consistencyFileName)));
 			}
-			
+
 			File newFile = new File(build.getRootDir().getAbsolutePath() + "/" + consistencyFileName);
 			FilePath newPath = new FilePath(newFile);
-			
-			//Stub: copy the config from old to new. 
+
+			// Stub: copy the config from old to new.
 			logger.println("old and new paths are: " + oldPath.toString() + " to " + newPath.toString());
 //			oldPath.copyTo(newPath);
-			
+
 			ConsistencyChecksResult ccr = loadResults(oldPath, build, logger);
-			ConsistencyChecksRunner crr = new ConsistencyChecksRunner(ccr, logger);
-			crr.runChecks();
-			crr.saveResults(newPath);
-			
-			
-			logger.println("Consistency Checking: DONE");
-			logger.println("Displaying Consistency Checking Results: START");
-			
+			if (ccr != null) {
+				ConsistencyChecksRunner crr = new ConsistencyChecksRunner(ccr, logger);
+				crr.runChecks();
+				crr.saveResults(newPath);
+
+				logger.println("Consistency Checking: DONE");
+				logger.println("Displaying Consistency Checking Results: START");
+
 //			logger.println("checking for results in workspace: " + workspace.toString());
 //			logger.println("checking for results in " + build.getRootDir().getAbsolutePath() + "/" + consistencyFileName);
-			FilePath results = new FilePath(new File(build.getRootDir().getAbsolutePath() + "/" + consistencyFileName));
-			logger.println("results path is: " + results.toString());
+				FilePath results = new FilePath(
+						new File(build.getRootDir().getAbsolutePath() + "/" + consistencyFileName));
+				logger.println("results path is: " + results.toString());
 
 //			boolean filesSaved = saveReports(workspace, ConsistencyChecker.getReportsDirectory(build), results, logger);
 //			if (!filesSaved) {
@@ -218,20 +221,20 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 //				return Boolean.TRUE;
 //			}
 
-			ConsistencyChecksResult checksResult = null;
-			try {
-				logger.println("loading results");
-				checksResult = loadResults(results, build, logger);
-				logger.println("loaded results");
-				checksResult.setShowOnlyFailures(this.getShowOnlyFailures());
-				checksResult.tally();
-			} catch (Throwable t) {
-				/*
-				 * don't fail build if TAP parser barfs. only print out the exception to
-				 * console.
-				 */
-				t.printStackTrace(logger);
-			}
+				ConsistencyChecksResult checksResult = null;
+				try {
+					logger.println("loading results");
+					checksResult = loadResults(results, build, logger);
+					logger.println("loaded results");
+					checksResult.setShowOnlyFailures(this.getShowOnlyFailures());
+					checksResult.tally();
+				} catch (Throwable t) {
+					/*
+					 * don't fail build if TAP parser barfs. only print out the exception to
+					 * console.
+					 */
+					t.printStackTrace(logger);
+				}
 
 //            TapTestResultAction trAction = build.getAction(TapTestResultAction.class);
 //			boolean appending = false;
@@ -245,56 +248,61 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 //                logger.println("taptestresultaction existing, appending true");
 //                trAction.mergeResult(checksResult);
 //            }
-    
+
 //            if (!appending) {
 //                build.addAction(trAction);
 //            }
 
-			if (checksResult.getConfig().getEntries().size() > 0 || checksResult.getParseErrorTestSets().size() > 0) {
-				// create an individual report for all of the results and add it to
-				// the build
+				if (checksResult.getConfig().getEntries().size() > 0
+						|| checksResult.getParseErrorTestSets().size() > 0) {
+					// create an individual report for all of the results and add it to
+					// the build
 
-				TapBuildAction action = build.getAction(TapBuildAction.class);
-				if (action == null) {
-					logger.println("adding tapbuildaction");//TODO this seems to add the consistency check results and the now empty line to the menu on the left
-					action = new TapBuildAction(build, checksResult);
-					build.addAction(action);
-				} else {
-					logger.println("merging result NYI!");
+					TapBuildAction action = build.getAction(TapBuildAction.class);
+					if (action == null) {
+						logger.println("adding tapbuildaction");// TODO this seems to add the consistency check results
+																// and the now empty line to the menu on the left
+						action = new TapBuildAction(build, checksResult);
+						build.addAction(action);
+					} else {
+						logger.println("merging result NYI!");
 //					appending = true;
 //					action.mergeResult(checksResult); //TODO
-				}
+					}
 
-				if (checksResult.hasParseErrors()) {
-					listener.getLogger().println("TAP parse errors found in the build. Marking build as UNSTABLE");
-					build.setResult(Result.UNSTABLE);
-				}
-
-				if (checksResult.getFailed() > 0) {
-					if (this.getFailIfChecksFail()) {
-						listener.getLogger().println(
-								"There are failed test cases and the job is configured to mark the build as failure. Marking build as FAILURE");
-						build.setResult(Result.FAILURE);
-					} else {
-						listener.getLogger().println("There are failed test cases. Marking build as UNSTABLE");
+					if (checksResult.hasParseErrors()) {
+						listener.getLogger().println("TAP parse errors found in the build. Marking build as UNSTABLE");
 						build.setResult(Result.UNSTABLE);
 					}
-				}
+
+					if (checksResult.getFailed() > 0) {
+						if (this.getFailIfChecksFail()) {
+							listener.getLogger().println(
+									"There are failed test cases and the job is configured to mark the build as failure. Marking build as FAILURE");
+							build.setResult(Result.FAILURE);
+						} else {
+							listener.getLogger().println("There are failed test cases. Marking build as UNSTABLE");
+							build.setResult(Result.UNSTABLE);
+						}
+					}
 
 //				if (appending) {
 					build.save();
 //				}
 
+				} else {
+					logger.println("Found matching files but did not find any TAP results.");
+					return Boolean.TRUE;
+				}
 			} else {
-				logger.println("Found matching files but did not find any TAP results.");
-				return Boolean.TRUE;
+				logger.println("No consistency checks configured");
 			}
 
 			logger.println("Consistency Checking: FINISH");
 		} else {
 			logger.println("Build result is not better or equal unstable. Skipping TAP publisher.");
 		}
-		return Boolean.TRUE;		
+		return Boolean.TRUE;
 	}
 
 	/**
@@ -350,14 +358,16 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 			final ConsistencyChecksParser parser = new ConsistencyChecksParser();
 
 			logger.println("parsing results from hardcoded location");
-			
+
 			final ConsistencyChecksResult result = parser.parse(results, owner, logger);
-			result.setOwner(owner);
+			if (result != null) {
+				result.setOwner(owner);
+			}
 			return result;
 		} catch (Exception e) {
 			e.printStackTrace(logger);
 
-			//TODO fix this, for now null since exception scenario anyway.
+			// TODO fix this, for now null since exception scenario anyway.
 			ccr = new ConsistencyChecksResult("", null, owner, null);
 			ccr.setOwner(owner);
 			return ccr;
@@ -401,9 +411,9 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 		try {
 			tapDir.mkdirs();
 //			for (FilePath report : reports) {
-				// FilePath dst = tapDir.child(report.getName());
-				FilePath dst = getDistDir(workspace, tapDir, report);
-				report.copyTo(dst);
+			// FilePath dst = tapDir.child(report.getName());
+			FilePath dst = getDistDir(workspace, tapDir, report);
+			report.copyTo(dst);
 //			}
 		} catch (Exception e) {
 			e.printStackTrace(logger);
@@ -532,8 +542,5 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 		}
 
 	}
-	
 
-    
-    
 }

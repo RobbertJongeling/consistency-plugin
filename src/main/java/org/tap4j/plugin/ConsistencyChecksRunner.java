@@ -22,11 +22,13 @@ public class ConsistencyChecksRunner {
 	public void runChecks() {
 		Config config = ccr.getConfig();
 		
-		for(Entry e : config.getEntries()) {
-			if (e instanceof ConsistencyRuleEntry) {
-				ConsistencyRuleEntry cre = (ConsistencyRuleEntry) e;
-
-				execute(cre);
+		if(config != null) {
+			for(Entry e : config.getEntries()) {
+				if (e instanceof ConsistencyRuleEntry) {
+					ConsistencyRuleEntry cre = (ConsistencyRuleEntry) e;
+	
+					execute(cre);
+				}
 			}
 		}
 		
