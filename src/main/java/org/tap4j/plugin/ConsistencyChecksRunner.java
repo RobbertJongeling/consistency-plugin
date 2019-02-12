@@ -6,6 +6,11 @@ import org.tap4j.plugin.TapProjectAction.Config;
 import org.tap4j.plugin.TapProjectAction.ConsistencyRuleEntry;
 import org.tap4j.plugin.TapProjectAction.Entry;
 import org.tap4j.plugin.model.CheckResult;
+import org.tap4j.plugin.model.CheckStrictness;
+import org.tap4j.plugin.model.CheckType;
+import org.tap4j.plugin.model.ModelElement;
+import org.tap4j.plugin.model.Node;
+import org.tap4j.plugin.transforms.SysML2Graph;
 
 import hudson.FilePath;
 
@@ -54,10 +59,15 @@ public class ConsistencyChecksRunner {
 		// stub: set result of each test to pass, except skips
 		if (!cre.getSkip()) {
 			logger.println("Running CRE: " + cre.toString());
-
-			// stubbing
-			CheckResult result = CheckResult.PASS;
-			String resultText = "Stub: for now setting everything to pass, unless the test is skipped";
+			
+			Node treeA = transform(cre.getA());
+			Node treeB = transform(cre.getB());
+			
+			GraphComparator gc = new GraphComparator(treeA, treeB);
+			gc.doCompare(cre.getChecktype(), cre.getStrictness());
+						
+			CheckResult result = gc.getResult();
+			String resultText = gc.getResultText();
 
 			cre.setResult(result);
 
@@ -76,5 +86,32 @@ public class ConsistencyChecksRunner {
 			cre.setResult(CheckResult.SKIP);
 			cre.setResultText("Test was skipped");
 		}
+	}
+	
+	private Node transform(ModelElement m) {
+		Node toReturn = null;
+		logger.println("transforming model element of type: " + m.getModelType());
+		switch(m.getModelType()) {
+		case "SysML":
+			transformSysML(m.getFile(), m.getFqn());
+			break;
+		case "Simulink":
+			transformSimulink(m.getFile(), m.getFqn());
+			break;
+		}
+		
+		return toReturn;
+	}
+	
+	private Node transformSysML(String filepath, String fqn) {
+		SysML2Graph s2g = new SysML2Graph(filepath, fqn);
+		Node toReturn = s2g.doTransform();
+		logger.println("transformed sysml: " + toReturn.name + ":" + toReturn.type + "-(" + toReturn.optional + ")");
+		return toReturn;
+	}
+	
+	private Node transformSimulink(String filepath, String fqn) {
+		//TODO implement
+		return new Node("testSimulinkType", "testSimulinkName");
 	}
 }

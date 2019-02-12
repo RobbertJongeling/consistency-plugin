@@ -702,7 +702,9 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			public ListBoxModel doFillTypeBItems() {
 				return doFillModelTypeItems();
 			}	
-			
+
+			//TODO would be nice to use the modeltype input as queryParameter for the files
+			// s.t. if you select Simulink, only .slx is showing, For SysML only .uml etc.
 			public ListBoxModel doFillFileAItems() {
 				return doFillFileItems();
 			}
