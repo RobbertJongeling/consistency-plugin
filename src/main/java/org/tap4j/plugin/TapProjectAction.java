@@ -513,7 +513,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 
 		private ModelElement a;
 		private ModelElement b;
-		private CheckType type;
+		private CheckType checktype;
 		private CheckStrictness strictness;
 		private boolean mute;
 		private boolean skip;
@@ -521,10 +521,10 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		private String resultText;
 		
 //		@DataBoundConstructor
-		public ConsistencyRuleEntry(ModelElement a, ModelElement b, CheckType type, CheckStrictness strictness, boolean mute, boolean skip, CheckResult result, String resultText) {
+		public ConsistencyRuleEntry(ModelElement a, ModelElement b, CheckType checktype, CheckStrictness strictness, boolean mute, boolean skip, CheckResult result, String resultText) {
 			this.a = a;
 			this.b = b;
-			this.type = type;
+			this.checktype = checktype;
 			this.strictness = strictness;
 			this.mute = mute;
 			this.skip = skip;
@@ -533,16 +533,16 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		}
 		
 		@DataBoundConstructor
-		public ConsistencyRuleEntry(String fileA, String fqnA, String fileB, String fqnB, String type, String strictness, boolean mute, boolean skip, String result, String resultText) {
-			this.a = new ModelElement(fileA, fqnA);
-			this.b = new ModelElement(fileB, fqnB);
-						
-			switch(type) {
+		public ConsistencyRuleEntry(String typeA, String fileA, String fqnA, String typeB, String fileB, String fqnB, String checktype, String strictness, boolean mute, boolean skip, String result, String resultText) {
+			this.a = new ModelElement(typeA, fileA, fqnA);
+			this.b = new ModelElement(typeB, fileB, fqnB);
+			
+			switch(checktype) {
 			case "REFINEMENT":
-				this.type = CheckType.REFINEMENT;
+				this.checktype = CheckType.REFINEMENT;
 				break;
 			case "EQUIVALENCE":
-				this.type = CheckType.EQUIVALENCE;
+				this.checktype = CheckType.EQUIVALENCE;
 				break;
 			}
 			
@@ -589,12 +589,20 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			return b;
 		}
 		
+		public String getTypeA() {
+			return a.getModelType();
+		}
+		
 		public String getFileA() {
 			return a.getFile();
 		}
 		
 		public String getFqnA() {
 			return a.getFqn();
+		}
+		
+		public String getTypeB() {
+			return b.getModelType();
 		}
 		
 		public String getFileB() {
@@ -605,8 +613,8 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			return a.getFqn();
 		}
 		
-		public CheckType getType() {
-			return type;
+		public CheckType getChecktype() {
+			return checktype;
 		}
 
 		public CheckStrictness getStrictness() {
@@ -652,7 +660,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 				return new ListBoxModel().add("LOOSE").add("STRICT");
 			}
 			
-			public ListBoxModel doFillTypeItems() {
+			public ListBoxModel doFillChecktypeItems() {
 				return new ListBoxModel().add("REFINEMENT").add("EQUIVALENCE");
 			}
 			
@@ -682,6 +690,18 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 				}
 				return toReturn;
 			}
+			
+			public ListBoxModel doFillModelTypeItems() {
+				return new ListBoxModel().add("SysML").add("Simulink");
+			}
+			
+			public ListBoxModel doFillTypeAItems() {
+				return doFillModelTypeItems();
+			}
+			
+			public ListBoxModel doFillTypeBItems() {
+				return doFillModelTypeItems();
+			}	
 			
 			public ListBoxModel doFillFileAItems() {
 				return doFillFileItems();
@@ -728,7 +748,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		
 		@Override
 		public String toString() {
-			return a.getFqn() + " from file " + a.getFile() + " " + strictness + " " + type + " consistent with " + b.getFqn() + " from file " + b.getFile() + ". Check is "
+			return a.getFqn() + " from file " + a.getFile() + " " + strictness + " " + checktype + " consistent with " + b.getFqn() + " from file " + b.getFile() + ". Check is "
 			+ (mute ? "" : "not ") + "muted and " + (skip ? "" : "not ") + "skipped.";
 		}
 	}

@@ -1,14 +1,24 @@
 package org.tap4j.plugin.model;
 
 public class ModelElement {
+	private String modelType;
 	private String file;
 	private String fqn;
 	
-	public ModelElement(String file, String fqn) {
+	public ModelElement(String modelType, String file, String fqn) {
+		this.setModelType(modelType);
 		this.setFile(file);
 		this.setFqn(fqn);
 	}
 
+	public String getModelType() {
+		return modelType;
+	}
+	
+	public void setModelType(String modelType) {
+		this.modelType = modelType;
+	}
+	
 	public String getFile() {
 		return file;
 	}

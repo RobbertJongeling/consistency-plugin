@@ -27,11 +27,17 @@ THE SOFTWARE.
 	<f:entry field="resultText" title="Comments:">
 		<f:readOnlyTextbox/>
 	</f:entry>
+	<f:entry field="typeA" title="Type of model A">
+          <f:select />
+    </f:entry>
 	<f:entry field="fileA" title="File of A">
           <f:select />
     </f:entry>
     <f:entry field="fqnA" title="FQN of A">
         <f:select/>
+    </f:entry>
+    <f:entry field="typeB" title="Type of model B">
+          <f:select />
     </f:entry>
     <f:entry field="fileB" title="File of B">
         <f:select/>
@@ -42,7 +48,7 @@ THE SOFTWARE.
     <f:entry field="strictness" title="Strictness">
           <f:select />
     </f:entry>
-    <f:entry field="type" title="Type">
+    <f:entry field="checktype" title="Type of check">
           <f:select />
     </f:entry>
     <f:entry title="">
