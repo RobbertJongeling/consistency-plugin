@@ -121,7 +121,7 @@
 			</exclusions>
 		</dependency>
 		<!--  For XTend, manually -->
-		<dependency>
+		<!--<dependency>
 		    <groupId>org.eclipse.emf</groupId>
 		    <artifactId>org.eclipse.emf.common</artifactId>
 		    <version>2.14.0</version>
@@ -190,41 +190,41 @@
 		    <version>5.4.0.v201806041153</version>
 		    <scope>system</scope>
 		    <systemPath>/Applications/Eclipse-P2.app/Contents/Eclipse/plugins/org.eclipse.uml2.uml.resources_5.4.0.v20180604-1153.jar</systemPath>
-		</dependency>
+		</dependency> -->
 		
-		<!-- given up: taking them from mvnrepository-->	
-		<!-- https://mvnrepository.com/artifact/org.eclipse.emf/org.eclipse.emf.common 
+		
+		<!-- https://mvnrepository.com/artifact/org.eclipse.emf/org.eclipse.emf.common -->
 		<dependency>
 		    <groupId>org.eclipse.emf</groupId>
 		    <artifactId>org.eclipse.emf.common</artifactId>
 		    <version>2.15.0</version>
-		</dependency>-->
-		<!-- https://mvnrepository.com/artifact/org.eclipse.emf/org.eclipse.emf.ecore 
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.eclipse.emf/org.eclipse.emf.ecore -->
 		<dependency>
 		    <groupId>org.eclipse.emf</groupId>
 		    <artifactId>org.eclipse.emf.ecore</artifactId>
 		    <version>2.15.0</version>
-		</dependency>-->
-		<!-- https://mvnrepository.com/artifact/org.eclipse.emf/org.eclipse.emf.ecore.xmi
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.eclipse.emf/org.eclipse.emf.ecore.xmi-->
 		<dependency>
 		    <groupId>org.eclipse.emf</groupId>
 		    <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
 		    <version>2.15.0</version>
-		</dependency> -->
-		<!-- https://mvnrepository.com/artifact/org.eclipse.emf/org.eclipse.emf.mapping.ecore2xml
+		</dependency> 
+		<!-- https://mvnrepository.com/artifact/org.eclipse.emf/org.eclipse.emf.mapping.ecore2xml-->
 		<dependency>
 		    <groupId>org.eclipse.emf</groupId>
 		    <artifactId>org.eclipse.emf.mapping.ecore2xml</artifactId>
 		    <version>2.11.0</version>
-		</dependency> -->
+		</dependency> 
 		
 		<!--  these seem old -->
-		<!-- https://mvnrepository.com/artifact/org.eclipse.papyrus.sysml/org.eclipse.papyrus.sysml14 
+		<!-- https://mvnrepository.com/artifact/org.eclipse.papyrus.sysml/org.eclipse.papyrus.sysml14 -->
 		<dependency>
 		    <groupId>org.eclipse.papyrus.sysml</groupId>
 		    <artifactId>org.eclipse.papyrus.sysml14</artifactId>
 		    <version>0.8.0</version>
-		</dependency>-->
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.eclipse.uml2/org.eclipse.uml2.common 
 		<dependency>
 		    <groupId>org.eclipse.uml2</groupId>
@@ -243,24 +243,77 @@
 		    <artifactId>org.eclipse.uml2.uml</artifactId>
 		    <version>3.1.0.v201006071150</version>
 		</dependency>-->
+		<!-- https://mvnrepository.com/artifact/org.eclipse.uml2/uml -->
+		<dependency>
+		    <groupId>org.eclipse.uml2</groupId>
+		    <artifactId>uml</artifactId>
+		    <version>5.0.0-v20140602-0749</version>
+		    <exclusions>			
+				<exclusion>
+					<!-- exclude this transitive emf ecore, which it complains about even though I already include it -->
+					<groupId>org.eclipse.emf</groupId>
+			   		<artifactId>ecore</artifactId>
+		   		</exclusion>		   		
+		   		<exclusion>
+					<!-- exclude this transitive emf ecore, which it complains about even though I already include it -->
+					<groupId>org.eclipse.emf.ecore</groupId>
+			   		<artifactId>xmi</artifactId>
+		   		</exclusion>
+		   		<exclusion>
+					<!-- exclude this transitive emf ecore, which it complains about even though I already include it -->
+					<groupId>org.eclipse.emf.mapping</groupId>
+			   		<artifactId>ecore2xml</artifactId>
+		   		</exclusion>
+	   		</exclusions>
+		</dependency>
+		
 		<!-- https://mvnrepository.com/artifact/org.eclipse.uml2.uml.profile/standard 
 		<dependency>
 		    <groupId>org.eclipse.uml2.uml.profile</groupId>
 		    <artifactId>standard</artifactId>
 		    <version>1.0.0-v20140602-0749</version>
 		</dependency>-->
-		<!-- https://mvnrepository.com/artifact/org.eclipse.maven/org.eclipse.uml2.uml.resources 
+		<!-- https://mvnrepository.com/artifact/org.eclipse.maven/org.eclipse.uml2.uml.resources -->
+		<!-- https://mvnrepository.com/artifact/org.eclipse.uml2.uml/resources -->
 		<dependency>
-		    <groupId>org.eclipse.maven</groupId>
-		    <artifactId>org.eclipse.uml2.uml.resources</artifactId>
-		    <version>3.8.0</version>
-		</dependency>-->
+		    <groupId>org.eclipse.uml2.uml</groupId>
+		    <artifactId>resources</artifactId>
+		    <version>5.0.0-v20140602-0749</version>
+			<exclusions>			
+				<exclusion>
+					<!-- exclude this transitive emf ecore, which it complains about even though I already include it -->
+					<groupId>org.eclipse.emf</groupId>
+			   		<artifactId>ecore</artifactId>
+		   		</exclusion>
+		   		<exclusion>
+					<!-- exclude this transitive emf ecore, which it complains about even though I already include it -->
+					<groupId>org.eclipse.emf.ecore</groupId>
+			   		<artifactId>xmi</artifactId>
+		   		</exclusion>
+		   		<exclusion>
+					<!-- exclude this transitive emf ecore, which it complains about even though I already include it -->
+					<groupId>org.eclipse.emf.mapping</groupId>
+			   		<artifactId>ecore2xml</artifactId>
+		   		</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- 
+		<dependency>
+		    <groupId>org.eclipse.uml2</groupId>
+		    <artifactId>org.eclipse.uml2.uml.util</artifactId>
+		    <version>3.1.0.v201006071150</version>
+		</dependency>
+		 -->
 	</dependencies>
 
 	<repositories>
 		<repository>
 			<id>repo.jenkins-ci.org</id>
 			<url>http://repo.jenkins-ci.org/public/</url>
+		</repository>
+		<repository>
+			<id>mvnrepository.com</id>
+			<url>https://mvnrepository.com/repos/central/</url>
 		</repository>
 	</repositories>
 

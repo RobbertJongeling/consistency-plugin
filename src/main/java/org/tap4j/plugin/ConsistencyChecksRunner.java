@@ -59,12 +59,15 @@ public class ConsistencyChecksRunner {
 		// stub: set result of each test to pass, except skips
 		if (!cre.getSkip()) {
 			logger.println("Running CRE: " + cre.toString());
-			
+
+			logger.println("Running transformations.");
 			Node treeA = transform(cre.getA());
 			Node treeB = transform(cre.getB());
+			logger.println("Completed transformations, running comparisons");			
 			
 			GraphComparator gc = new GraphComparator(treeA, treeB);
 			gc.doCompare(cre.getChecktype(), cre.getStrictness());
+			logger.println("Completed comparisons");	
 						
 			CheckResult result = gc.getResult();
 			String resultText = gc.getResultText();

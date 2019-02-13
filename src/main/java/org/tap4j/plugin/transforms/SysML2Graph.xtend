@@ -4,7 +4,8 @@ import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.uml2.uml.resources.util.UMLResourcesUtil
 import org.eclipse.uml2.uml.UMLPlugin
-import org.eclipse.papyrus.sysml14.sysmlPackage
+import org.eclipse.papyrus.sysml14.definition.SysmlPackage
+import org.eclipse.uml2.uml.util.UMLUtil;
 import java.util.List
 import java.util.LinkedList
 import org.eclipse.emf.ecore.resource.Resource
@@ -29,9 +30,9 @@ class SysML2Graph {
 		UMLResourcesUtil.init(resourceSet)
 		resourceSet = new ResourceSetImpl()
 		
-		resourceSet.packageRegistry.put(sysmlPackage.eNS_URI, sysmlPackage.eINSTANCE)
+		resourceSet.packageRegistry.put(SysmlPackage.eNS_URI, SysmlPackage.eINSTANCE)
 		val prefix = "jar:file:Sysml2Text.jar!/SysML.profile.uml";
-		UMLPlugin.EPackageNsURIToProfileLocationMap.put(sysmlPackage.eNS_URI, URI.createURI(prefix + "#SysML"))
+		UMLPlugin.EPackageNsURIToProfileLocationMap.put(SysmlPackage.eNS_URI, URI.createURI(prefix + "#SysML"))
 	}
 	
   	def Node doTransform() {
