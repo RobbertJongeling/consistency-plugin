@@ -15,7 +15,6 @@ import org.eclipse.uml2.uml.Stereotype;
 import org.eclipse.uml2.uml.Type;
 import org.eclipse.uml2.uml.UMLPlugin;
 import org.eclipse.uml2.uml.resources.util.UMLResourcesUtil;
-import org.eclipse.xtext.xbase.lib.StringExtensions;
 import org.tap4j.plugin.model.Node;
 
 @SuppressWarnings("all")
@@ -117,7 +116,7 @@ public class SysML2Graph {
                     _xifexpression = p_1.getType().getName();
                   }
                   final String typename = _xifexpression;
-                  String _firstUpper = StringExtensions.toFirstUpper(fp.getDirection().getName());
+                  String _firstUpper = this.toFirstUpper(fp.getDirection().getName());
                   String _plus = (_firstUpper + "port");
                   String _name_3 = clazz.getName();
                   String _plus_1 = (_name_3 + "/");
@@ -193,7 +192,7 @@ public class SysML2Graph {
             _xifexpression = p.getType().getName();
           }
           final String typename = _xifexpression;
-          String _firstUpper = StringExtensions.toFirstUpper(fp.getDirection().getName());
+          String _firstUpper = this.toFirstUpper(fp.getDirection().getName());
           String _plus = (_firstUpper + "port");
           String _name_1 = p.getName();
           String _plus_1 = ((name + "/") + _name_1);
@@ -253,5 +252,17 @@ public class SysML2Graph {
       _xifexpression = (_plus + _name);
     }
     return _xifexpression;
+  }
+  
+  public String toFirstUpper(final String s) {
+    if (((s != null) && (s.length() > 0))) {
+      String _upperCase = s.substring(0, 1).toUpperCase();
+      int _length = s.length();
+      int _minus = (_length - 1);
+      String _substring = s.substring(1, _minus);
+      return (_upperCase + _substring);
+    } else {
+      return "";
+    }
   }
 }

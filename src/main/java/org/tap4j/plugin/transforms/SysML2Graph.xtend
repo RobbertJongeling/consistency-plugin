@@ -95,7 +95,7 @@ class SysML2Graph {
 							if(fps !== null) {
 								val fp = p.getStereotypeApplication(fps) as FlowPort
 								val typename = if (p.type === null) "" else p.type.name
-								toReturn.addChild(new Node(fp.direction.getName().toFirstUpper + "port", clazz.name + "/" + p.name, "Bus: " + typename))
+								toReturn.addChild(new Node(toFirstUpper(fp.direction.getName()) + "port", clazz.name + "/" + p.name, "Bus: " + typename))
 							}
 						}
 					}
@@ -161,7 +161,7 @@ class SysML2Graph {
 			if(fps !== null) {
 				val fp = p.getStereotypeApplication(fps) as FlowPort
 				val typename = if (p.type === null) "" else p.type.name
-				toReturn.addChild(new Node(fp.direction.getName().toFirstUpper + "port", name + "/" + p.name + "-Bus: " + typename))
+				toReturn.addChild(new Node(toFirstUpper(fp.direction.getName()) + "port", name + "/" + p.name + "-Bus: " + typename))
 			}
 		}
   		
@@ -192,5 +192,13 @@ class SysML2Graph {
   	
   	def String getFQN(org.eclipse.uml2.uml.Class clazz) {
   		return if(clazz.owner === null) clazz.name else getFQN(clazz.owner) + "/" + clazz.name
+  	}
+  	
+  	def String toFirstUpper(String s) {
+  		if(s !== null && s.length > 0) {
+  			return s.substring(0,1).toUpperCase + s.substring(1,s.length-1)
+  		} else { 
+  			return "";
+  		}
   	}
 }
