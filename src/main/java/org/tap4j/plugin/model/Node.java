@@ -9,6 +9,11 @@ public class Node {
 		public String name;
 		public String optional;
 		public List<Node> children;
+
+		Node() {
+		  this("default", "default");
+		}
+		
 		
 		public Node(String type, String name) {
 			this(type, name, "");
@@ -97,7 +102,5 @@ public class Node {
 						
 			
 			return toReturn;
-		}
-		
-		
+		}		
 }
