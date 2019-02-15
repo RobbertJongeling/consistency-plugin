@@ -16,9 +16,10 @@ import org.eclipse.uml2.uml.Type;
 import org.eclipse.uml2.uml.UMLPlugin;
 import org.eclipse.uml2.uml.resources.util.UMLResourcesUtil;
 import org.tap4j.plugin.model.Node;
+import org.tap4j.plugin.transforms.Lang2Graph;
 
 @SuppressWarnings("all")
-public class SysML2Graph {
+public class SysML2Graph implements Lang2Graph {
   private ResourceSetImpl resourceSet;
   
   private String filePath;
@@ -27,6 +28,7 @@ public class SysML2Graph {
   
   public SysML2Graph(final String filePath, final String fqn) {
     this.filePath = filePath;
+    this.fqn = fqn;
     this.doResourceSetup();
   }
   
@@ -43,6 +45,7 @@ public class SysML2Graph {
     return _xblockexpression;
   }
   
+  @Override
   public Node doTransform() {
     final Resource resource = this.resourceSet.getResource(URI.createURI(this.filePath), true);
     return this.getTree(resource);

@@ -5,25 +5,20 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.uml2.uml.resources.util.UMLResourcesUtil
 import org.eclipse.uml2.uml.UMLPlugin
 import org.eclipse.papyrus.sysml14.definition.SysmlPackage
-import org.eclipse.uml2.uml.util.UMLUtil;
-import java.util.List
-import java.util.LinkedList
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.papyrus.sysml14.deprecatedelements.FlowPort
-import java.io.FileWriter
-import java.io.BufferedWriter
 import org.tap4j.plugin.model.Node
-import org.eclipse.papyrus.sysml14.sysmlPackage.Literals
 
-class SysML2Graph {
+class SysML2Graph implements Lang2Graph {
 		
 	var ResourceSetImpl resourceSet
 	var String filePath
 	var String fqn
 	
 	new(String filePath, String fqn) {
-		this.filePath = filePath;
-		doResourceSetup();
+		this.filePath = filePath
+		this.fqn = fqn
+		doResourceSetup()
 	}		
 	
 	def doResourceSetup() {
@@ -35,14 +30,12 @@ class SysML2Graph {
 		UMLPlugin.EPackageNsURIToProfileLocationMap.put(SysmlPackage.eNS_URI, URI.createURI(prefix + "#SysML"))
 	}
 	
-  	def Node doTransform() {
-  		//TODO implement
+  	override Node doTransform() {
   		//stub
-//  		var Node n = new Node("testSysMLType", "testSysMLName", "testSysMLOptional")
-//  		var Node m = new Node("testSysMLTypeChild", "testSysMLNameChild", "testSysMLOptionalChild")
-//  		n.addChild(m)
-//  		return toReturn
-  		
+//  	var Node n = new Node("testSysMLType", "testSysMLName", "testSysMLOptional")
+//  	var Node m = new Node("testSysMLTypeChild", "testSysMLNameChild", "testSysMLOptionalChild")
+//  	n.addChild(m)
+// 		return n
   		val resource = resourceSet.getResource(URI.createURI(filePath), true)
   		return getTree(resource);
   	}
