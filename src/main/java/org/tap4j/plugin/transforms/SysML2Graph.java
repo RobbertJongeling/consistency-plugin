@@ -2,6 +2,7 @@ package org.tap4j.plugin.transforms;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
+import java.io.PrintStream;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -15,6 +16,7 @@ import org.eclipse.uml2.uml.Stereotype;
 import org.eclipse.uml2.uml.Type;
 import org.eclipse.uml2.uml.UMLPlugin;
 import org.eclipse.uml2.uml.resources.util.UMLResourcesUtil;
+import org.eclipse.xtext.xbase.lib.Conversions;
 import org.tap4j.plugin.model.Node;
 import org.tap4j.plugin.transforms.Lang2Graph;
 
@@ -26,7 +28,10 @@ public class SysML2Graph implements Lang2Graph {
   
   private String fqn;
   
-  public SysML2Graph(final String filePath, final String fqn) {
+  private PrintStream logger;
+  
+  public SysML2Graph(final PrintStream logger, final String filePath, final String fqn) {
+    this.logger = logger;
     this.filePath = filePath;
     this.fqn = fqn;
     this.doResourceSetup();
@@ -39,8 +44,9 @@ public class SysML2Graph implements Lang2Graph {
       ResourceSetImpl _resourceSetImpl = new ResourceSetImpl();
       this.resourceSet = _resourceSetImpl;
       this.resourceSet.getPackageRegistry().put(SysmlPackage.eNS_URI, SysmlPackage.eINSTANCE);
-      final String prefix = "jar:file:Sysml2Text.jar!/SysML.profile.uml";
-      _xblockexpression = UMLPlugin.getEPackageNsURIToProfileLocationMap().put(SysmlPackage.eNS_URI, URI.createURI((prefix + "#SysML")));
+      URI uri = URI.createURI(("hpi:file:consistency.hpi!/icons/SysML.profile.uml" + "#SysML"));
+      this.logger.println(("profile location: " + uri));
+      _xblockexpression = UMLPlugin.getEPackageNsURIToProfileLocationMap().put(SysmlPackage.eNS_URI, uri);
     }
     return _xblockexpression;
   }
@@ -48,6 +54,7 @@ public class SysML2Graph implements Lang2Graph {
   @Override
   public Node doTransform() {
     final Resource resource = this.resourceSet.getResource(URI.createURI(this.filePath), true);
+    this.logger.println(((("created resource for uri: " + this.filePath) + ". resource: ") + resource));
     return this.getTree(resource);
   }
   
@@ -57,21 +64,22 @@ public class SysML2Graph implements Lang2Graph {
    * The top element can be either model, package or class (block).
    */
   public Node getTree(final Resource resource) {
-    Node toReturn = null;
+    Node toReturn = new Node("null", "null", "null");
+    int _length = ((Object[])Conversions.unwrapArray(resource.getContents(), Object.class)).length;
+    String _plus = ("resource contents length: " + Integer.valueOf(_length));
+    this.logger.println(_plus);
     Iterable<Model> _filter = Iterables.<Model>filter(resource.getContents(), Model.class);
     for (final Model model : _filter) {
-      String _name = model.getName();
-      boolean _equals = Objects.equal(_name, this.fqn);
-      if (_equals) {
+      if (true) {
         toReturn = this.getTree(model);
       } else {
         Iterable<org.eclipse.uml2.uml.Package> _filter_1 = Iterables.<org.eclipse.uml2.uml.Package>filter(model.allOwnedElements(), org.eclipse.uml2.uml.Package.class);
         for (final org.eclipse.uml2.uml.Package pkg : _filter_1) {
           String _fQN = this.getFQN(pkg);
-          boolean _equals_1 = Objects.equal(_fQN, this.fqn);
-          if (_equals_1) {
-            String _name_1 = pkg.getName();
-            Node _node = new Node("Rootblock", _name_1);
+          boolean _equals = Objects.equal(_fQN, this.fqn);
+          if (_equals) {
+            String _name = pkg.getName();
+            Node _node = new Node("Rootblock", _name);
             toReturn = _node;
             Iterable<org.eclipse.uml2.uml.Package> _filter_2 = Iterables.<org.eclipse.uml2.uml.Package>filter(pkg.getOwnedElements(), org.eclipse.uml2.uml.Package.class);
             for (final org.eclipse.uml2.uml.Package p : _filter_2) {
@@ -90,10 +98,10 @@ public class SysML2Graph implements Lang2Graph {
         Iterable<org.eclipse.uml2.uml.Class> _filter_4 = Iterables.<org.eclipse.uml2.uml.Class>filter(model.allOwnedElements(), org.eclipse.uml2.uml.Class.class);
         for (final org.eclipse.uml2.uml.Class clazz : _filter_4) {
           String _fQN_1 = this.getFQN(clazz);
-          boolean _equals_2 = Objects.equal(_fQN_1, this.fqn);
-          if (_equals_2) {
-            String _name_2 = clazz.getName();
-            Node _node_1 = new Node("Rootblock", _name_2);
+          boolean _equals_1 = Objects.equal(_fQN_1, this.fqn);
+          if (_equals_1) {
+            String _name_1 = clazz.getName();
+            Node _node_1 = new Node("Rootblock", _name_1);
             toReturn = _node_1;
             Iterable<org.eclipse.uml2.uml.Class> _filter_5 = Iterables.<org.eclipse.uml2.uml.Class>filter(clazz.getOwnedElements(), org.eclipse.uml2.uml.Class.class);
             for (final org.eclipse.uml2.uml.Class c_1 : _filter_5) {
@@ -120,12 +128,12 @@ public class SysML2Graph implements Lang2Graph {
                   }
                   final String typename = _xifexpression;
                   String _firstUpper = this.toFirstUpper(fp.getDirection().getName());
-                  String _plus = (_firstUpper + "port");
-                  String _name_3 = clazz.getName();
-                  String _plus_1 = (_name_3 + "/");
-                  String _name_4 = p_1.getName();
-                  String _plus_2 = (_plus_1 + _name_4);
-                  Node _node_2 = new Node(_plus, _plus_2, ("Bus: " + typename));
+                  String _plus_1 = (_firstUpper + "port");
+                  String _name_2 = clazz.getName();
+                  String _plus_2 = (_name_2 + "/");
+                  String _name_3 = p_1.getName();
+                  String _plus_3 = (_plus_2 + _name_3);
+                  Node _node_2 = new Node(_plus_1, _plus_3, ("Bus: " + typename));
                   toReturn.addChild(_node_2);
                 }
               }
@@ -138,13 +146,15 @@ public class SysML2Graph implements Lang2Graph {
   }
   
   public Node getTree(final Model model) {
-    Node toReturn = null;
     final String name = model.getName();
-    Node _node = new Node("Rootblock", name);
-    toReturn = _node;
+    Node toReturn = new Node("Rootblock", name);
     Iterable<org.eclipse.uml2.uml.Package> _filter = Iterables.<org.eclipse.uml2.uml.Package>filter(model.getOwnedElements(), org.eclipse.uml2.uml.Package.class);
     for (final org.eclipse.uml2.uml.Package p : _filter) {
       toReturn.addChild(this.getTree(p, name));
+    }
+    Iterable<org.eclipse.uml2.uml.Class> _filter_1 = Iterables.<org.eclipse.uml2.uml.Class>filter(model.getOwnedElements(), org.eclipse.uml2.uml.Class.class);
+    for (final org.eclipse.uml2.uml.Class c : _filter_1) {
+      toReturn.addChild(this.getTree(c, name));
     }
     return toReturn;
   }

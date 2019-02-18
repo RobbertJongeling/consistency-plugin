@@ -8,14 +8,18 @@ import org.eclipse.papyrus.sysml14.definition.SysmlPackage
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.papyrus.sysml14.deprecatedelements.FlowPort
 import org.tap4j.plugin.model.Node
+import jenkins.model.Jenkins
+import java.io.PrintStream
 
 class SysML2Graph implements Lang2Graph {
 		
 	var ResourceSetImpl resourceSet
 	var String filePath
 	var String fqn
+	var PrintStream logger
 	
-	new(String filePath, String fqn) {
+	new(PrintStream logger, String filePath, String fqn) {
+		this.logger = logger
 		this.filePath = filePath
 		this.fqn = fqn
 		doResourceSetup()
@@ -26,8 +30,11 @@ class SysML2Graph implements Lang2Graph {
 		resourceSet = new ResourceSetImpl()
 		
 		resourceSet.packageRegistry.put(SysmlPackage.eNS_URI, SysmlPackage.eINSTANCE)
-		val prefix = "jar:file:Sysml2Text.jar!/SysML.profile.uml";//TODO fix this reference
-		UMLPlugin.EPackageNsURIToProfileLocationMap.put(SysmlPackage.eNS_URI, URI.createURI(prefix + "#SysML"))
+//		val prefix = "jar:file:Sysml2Text.jar!/SysML.profile.uml";//TODO fix this reference
+
+		var URI uri = URI.createURI("hpi:file:consistency.hpi!/icons/SysML.profile.uml" + "#SysML")  
+		logger.println("profile location: " + uri)
+		UMLPlugin.EPackageNsURIToProfileLocationMap.put(SysmlPackage.eNS_URI, uri)
 	}
 	
   	override Node doTransform() {
@@ -37,7 +44,8 @@ class SysML2Graph implements Lang2Graph {
 //  	n.addChild(m)
 // 		return n
   		val resource = resourceSet.getResource(URI.createURI(filePath), true)
-  		return getTree(resource);
+  		logger.println("created resource for uri: " + filePath + ". resource: " + resource)
+  		return resource.tree
   	}
   	
   	/**
@@ -46,10 +54,13 @@ class SysML2Graph implements Lang2Graph {
   	 * The top element can be either model, package or class (block).
   	 */
   	def Node getTree(Resource resource) {
-  		var Node toReturn
+  		var Node toReturn = new Node("null", "null", "null")
+  		
+  		logger.println("resource contents length: " + resource.contents.length)
+  		
   		
 	 	for (model : resource.contents.filter(org.eclipse.uml2.uml.Model)) {
-	 		if(model.name == fqn) { //== maps to Object.equals in Xtend
+	 		if(true /*model.name == fqn*/) { //== maps to Object.equals in Xtend //FOR TESTING, ALWAYS MATCH MODEL TOTO FIX
 	 			toReturn = getTree(model)
 	 		} else {
 	 			//check if there is a package or class that is the top element.
@@ -103,13 +114,15 @@ class SysML2Graph implements Lang2Graph {
   	 * 
   	 */
   	def Node getTree(org.eclipse.uml2.uml.Model model) {
-  		var Node toReturn
-  		
   		val name = model.name
-		toReturn = new Node("Rootblock", name)
+		var Node toReturn = new Node("Rootblock", name)
 		
 		for(p : model.ownedElements.filter(org.eclipse.uml2.uml.Package)) {
 			toReturn.addChild(getTree(p, name))
+		}
+		
+		for(c : model.ownedElements.filter(org.eclipse.uml2.uml.Class)) {
+			toReturn.addChild(getTree(c, name))
 		}
 		
   		return toReturn

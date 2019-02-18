@@ -57,7 +57,12 @@ public class Node {
 		
 		@Override
 		public String toString() {
-			return "Node: " + name + ", of type: " + type + " with optional parameter: " + optional + "."; 
+			StringBuilder sb = new StringBuilder();
+			sb.append("Node: " + name + ", of type: " + type + " with optional parameter: " + optional + "." + "\r\n");
+			for(Node c : this.children) {
+				sb.append(c.toString() + "\r\n");
+			}
+			return sb.toString(); 
 		}
 		
 		/**

@@ -112,16 +112,18 @@ public class ConsistencyChecksRunner {
 	}
 	
 	private Node transformSysML(String filepath, String fqn) {
-		SysML2Graph s2g = new SysML2Graph(filepath, fqn);
+		SysML2Graph s2g = new SysML2Graph(logger, filepath, fqn);
 		Node toReturn = s2g.doTransform();
-		logger.println("transformed sysml: " + toReturn.name + ":" + toReturn.type + "-(" + toReturn.optional + ")");
+//		logger.println("transformed sysml: " + toReturn.name + ":" + toReturn.type + "-(" + toReturn.optional + ")");
+		logger.println(toReturn.toString());
 		return toReturn;
 	}
 	
 	private Node transformSimulink(String filepath, String fqn) {
 		Simulink2Graph s2g = new Simulink2Graph(filepath, fqn);
 		Node toReturn = s2g.doTransform();
-		logger.println("transformed simulink: " + toReturn.name + ":" + toReturn.type + "-(" + toReturn.optional + ")");
+//		logger.println("transformed simulink: " + toReturn.name + ":" + toReturn.type + "-(" + toReturn.optional + ")");
+		logger.println(toReturn.toString());
 		return toReturn;
 	}
 }
