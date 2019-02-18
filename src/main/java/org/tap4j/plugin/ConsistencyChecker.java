@@ -202,7 +202,7 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 
 			ConsistencyChecksResult ccr = loadResults(oldPath, build, logger);
 			if (ccr != null) {
-				ConsistencyChecksRunner crr = new ConsistencyChecksRunner(ccr, logger);
+				ConsistencyChecksRunner crr = new ConsistencyChecksRunner(workspace, ccr, logger);
 				crr.runChecks();
 				crr.saveResults(newPath);
 

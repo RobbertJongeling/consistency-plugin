@@ -10,16 +10,20 @@ import org.tap4j.plugin.model.CheckStrictness;
 import org.tap4j.plugin.model.CheckType;
 import org.tap4j.plugin.model.ModelElement;
 import org.tap4j.plugin.model.Node;
+import org.tap4j.plugin.transforms.Simulink2Graph;
 import org.tap4j.plugin.transforms.SysML2Graph;
 
 import hudson.FilePath;
+import jenkins.model.Jenkins;
 
 public class ConsistencyChecksRunner {
 
 	private ConsistencyChecksResult ccr;
 	private PrintStream logger;
+	private FilePath workspace;
 
-	public ConsistencyChecksRunner(ConsistencyChecksResult ccr, PrintStream logger) {
+	public ConsistencyChecksRunner(FilePath workspace, ConsistencyChecksResult ccr, PrintStream logger) {
+		this.workspace = workspace;
 		this.ccr = ccr;
 		this.logger = logger;
 	}
@@ -96,10 +100,11 @@ public class ConsistencyChecksRunner {
 		logger.println("transforming model element of type: " + m.getModelType());
 		switch(m.getModelType()) {
 		case "SysML":
-			transformSysML(m.getFile(), m.getFqn());
+			logger.println("getFile of modelElement: " + m.getFile());
+			transformSysML(workspace + "/" + m.getFile(), m.getFqn());
 			break;
 		case "Simulink":
-			transformSimulink(m.getFile(), m.getFqn());
+			transformSimulink(workspace + "/" + m.getFile(), m.getFqn());
 			break;
 		}
 		
@@ -114,7 +119,9 @@ public class ConsistencyChecksRunner {
 	}
 	
 	private Node transformSimulink(String filepath, String fqn) {
-		//TODO implement
-		return new Node("testSimulinkType", "testSimulinkName");
+		Simulink2Graph s2g = new Simulink2Graph(filepath, fqn);
+		Node toReturn = s2g.doTransform();
+		logger.println("transformed simulink: " + toReturn.name + ":" + toReturn.type + "-(" + toReturn.optional + ")");
+		return toReturn;
 	}
 }
