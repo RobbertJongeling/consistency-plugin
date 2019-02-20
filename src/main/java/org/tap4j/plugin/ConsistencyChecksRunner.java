@@ -116,6 +116,7 @@ public class ConsistencyChecksRunner {
 		Node toReturn = s2g.doTransform();
 //		logger.println("transformed sysml: " + toReturn.name + ":" + toReturn.type + "-(" + toReturn.optional + ")");
 		logger.println(toReturn.toString());
+		logger.println(toReturn.toGraphviz());
 		return toReturn;
 	}
 	
@@ -124,6 +125,7 @@ public class ConsistencyChecksRunner {
 		Node toReturn = s2g.doTransform();
 //		logger.println("transformed simulink: " + toReturn.name + ":" + toReturn.type + "-(" + toReturn.optional + ")");
 		logger.println(toReturn.toString());
+		logger.println(toReturn.toGraphviz());
 		return toReturn;
 	}
 }

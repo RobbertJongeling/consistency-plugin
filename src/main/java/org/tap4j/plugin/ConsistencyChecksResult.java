@@ -32,25 +32,26 @@ import hudson.util.FormApply;
 import jenkins.model.Jenkins;
 
 public class ConsistencyChecksResult implements ModelObject, Serializable, Describable<ConsistencyChecksResult> {
-	
-    private static final long serialVersionUID = 4343399327336076951L;
 
-    private static final Logger LOGGER = Logger.getLogger(ConsistencyChecksResult.class.getName());
+	private static final long serialVersionUID = 4343399327336076951L;
+
+	private static final Logger LOGGER = Logger.getLogger(ConsistencyChecksResult.class.getName());
 
 	private String name;
 	private String resultsFilePath;
-	private Run<?, ?>  build;
+	private Run<?, ?> build;
 	private Boolean showOnlyFailures;
-	//private List<ConsistencyRuleEntry> checkResults;
+	// private List<ConsistencyRuleEntry> checkResults;
 	private Config config;
-	
+
 	private int nrPassed;
 	private int nrFailed;
 	private int nrSkipped;
 	private int nrTodo;
 	private int total;
 
-	public ConsistencyChecksResult(String name, String resultsFilePath, Run<?, ?> build, Config config /*List<ConsistencyRuleEntry> checkResults*/) {
+	public ConsistencyChecksResult(String name, String resultsFilePath, Run<?, ?> build,
+			Config config /* List<ConsistencyRuleEntry> checkResults */) {
 		this.name = name;
 		this.resultsFilePath = resultsFilePath;
 		this.build = build;
@@ -59,7 +60,7 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 //		this.config = new Config(this.checkResults);
 		this.config = config;
 	}
-	
+
 	public static class ConsistencyChecksResultDescriptor extends Descriptor<ConsistencyChecksResult> {
 	}
 
@@ -71,19 +72,19 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 	public Descriptor<ConsistencyChecksResult> getDescriptor() {
 		return Jenkins.getInstance().getDescriptor(getClass());
 	}
-	
+
 	public String getConsistencyChecks() {
-		//TODO? 
+		// TODO?
 		return "hello world";
 	}
 
 	public void setOwner(Run<?, ?> build) {
-		this.build = build;		
+		this.build = build;
 	}
 
 	public void setShowOnlyFailures(Boolean showOnlyFailures) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 //	public List<ConsistencyRuleEntry> getCheckResults() {
@@ -126,31 +127,31 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 	}
 
 	public String getName() {
-        return name;
-    }
-	
+		return name;
+	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public XmlFile getResultsFile() {
 		return new XmlFile(new File(this.getResultsFilePath()));
 	}
-	
+
 	public String getResultsFilePath() {
-		if(resultsFilePath == null || resultsFilePath.equals("")) {
-			//TODO?
+		if (resultsFilePath == null || resultsFilePath.equals("")) {
+			// TODO?
 			LOGGER.log(Level.SEVERE, "resultsFilePath is null or empty String, can not save ");
 			resultsFilePath = "";
 		}
-		
+
 		return resultsFilePath;
 	}
-	
+
 	public Run<?, ?> getOwner() {
-        return this.build;
-    }
-	
+		return this.build;
+	}
+
 	public Config getConfig() {
 		return config;
 	}
@@ -158,15 +159,15 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 	public void setConfig(Config config) {
 		this.config = config;
 	}
-	
+
 	public void setResultsFilePath(String rfp) {
 		this.resultsFilePath = rfp;
 	}
-	
+
 	public void setResultsFilePath(FilePath rfp) {
 		this.resultsFilePath = rfp.getRemote();
 	}
-	
+
 	public HttpResponse doConfigSubmit(StaplerRequest req) throws ServletException, IOException {
 //		Config temp = config; //since config needs to be null for submitting, but if we leave it null then after save everything is gone.
 		config = null; // otherwise bindJSON will never clear it once set
@@ -200,55 +201,57 @@ public class ConsistencyChecksResult implements ModelObject, Serializable, Descr
 //			checksResult = new ConsistencyChecksResult("Consistency Checks Results", results.getRemote(), build, tpa.getConfig());
 //		}
 //	}
-	
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hudson.model.ModelObject#getDisplayName()
-     */
-    public String getDisplayName() {
-        return getName();
-    }
 
-    public void tally() {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see hudson.model.ModelObject#getDisplayName()
+	 */
+	public String getDisplayName() {
+		return getName();
+	}
+
+	public void tally() {
     	int passes = 0;
     	int fails = 0;
     	int skips = 0;
     	int todos = 0;
-		for(Entry e : config.getEntries()) {
-			if(e instanceof ConsistencyRuleEntry) {
-				ConsistencyRuleEntry cre = (ConsistencyRuleEntry)e;
-				switch(cre.getResult()) {
-				case PASS:
-					passes++;
-					break;
-				case FAIL:
-					fails++;
-					break;
-				case SKIP:
-					skips++;
-					break;
-				case MUTE:
-					//on purpose. This is used in summaries, so there essentially skip==mute.
-					skips++; 
-					break;
-				case NYE:
-					todos++;
-					break;
+    	if(config != null && config.getEntries() != null) {
+			for(Entry e : config.getEntries()) {
+				if(e instanceof ConsistencyRuleEntry) {
+					ConsistencyRuleEntry cre = (ConsistencyRuleEntry)e;
+					switch(cre.getResult()) {
+					case PASS:
+						passes++;
+						break;
+					case FAIL:
+						fails++;
+						break;
+					case SKIP:
+						skips++;
+						break;
+					case MUTE:
+						//on purpose. This is used in summaries, so there essentially skip==mute.
+						skips++; 
+						break;
+					case NYE:
+						todos++;
+						break;
+					}
 				}
 			}
-		}
+    	}
 		this.nrPassed = passes;
 		this.nrFailed = fails;
 		this.nrSkipped = skips;
 		this.nrTodo = todos;
 		this.total = this.nrPassed + this.nrFailed + this.nrSkipped + this.nrTodo;
     }
-    
+
 	public int getPassed() {
 		return this.nrPassed;
 	}
-	
+
 	public int getFailed() {
 		return this.nrFailed;
 	}

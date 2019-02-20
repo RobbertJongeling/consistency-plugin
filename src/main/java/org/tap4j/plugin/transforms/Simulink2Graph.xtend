@@ -28,17 +28,31 @@ class Simulink2Graph implements Lang2Graph {
 		var SimulinkModelBuilder builder = new SimulinkModelBuilder(file, new SimpleLogger())
 		var SimulinkModel model = builder.buildModel()
 
-		// dummy parse file
 		root = new Node("model", model.name, "opt")
-		for (SimulinkBlock block : model.getSubBlocks()) {
-			root.addChild(new Node("Block", block.getName()))
+			
+		for (SimulinkBlock block : model.subBlocks) {
+			root.addChild(getTree(block, model.name))
 		}
 		
 		return root
 	}
 
-	def Node getTree() {
-		// TODO implement
-		return null
+	def Node getTree(SimulinkBlock block, String prefix) {
+		var String name = prefix + "/" + block.name
+		var Node toReturn = new Node(block.type, name)
+//		
+//		for (ip : block.inPorts) {
+//			toReturn.addChild(new Node("inport", prefix + "/" + ip.index))
+//		}
+//		
+//		for(op : block.outPorts) {
+//			toReturn.addChild(new Node("outport", prefix + "/" +  op.index))
+//		}
+//		
+		for (b : block.subBlocks) {
+			toReturn.addChild(getTree(b, name))
+		}
+		
+		return toReturn
 	}
 }

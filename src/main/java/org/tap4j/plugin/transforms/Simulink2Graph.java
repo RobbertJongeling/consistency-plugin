@@ -34,9 +34,7 @@ public class Simulink2Graph implements Lang2Graph {
       root = _node;
       UnmodifiableCollection<SimulinkBlock> _subBlocks = model.getSubBlocks();
       for (final SimulinkBlock block : _subBlocks) {
-        String _name_1 = block.getName();
-        Node _node_1 = new Node("Block", _name_1);
-        root.addChild(_node_1);
+        root.addChild(this.getTree(block, model.getName()));
       }
       return root;
     } catch (Throwable _e) {
@@ -44,7 +42,15 @@ public class Simulink2Graph implements Lang2Graph {
     }
   }
   
-  public Node getTree() {
-    return null;
+  public Node getTree(final SimulinkBlock block, final String prefix) {
+    String _name = block.getName();
+    String name = ((prefix + "/") + _name);
+    String _type = block.getType();
+    Node toReturn = new Node(_type, name);
+    UnmodifiableCollection<SimulinkBlock> _subBlocks = block.getSubBlocks();
+    for (final SimulinkBlock b : _subBlocks) {
+      toReturn.addChild(this.getTree(b, name));
+    }
+    return toReturn;
   }
 }

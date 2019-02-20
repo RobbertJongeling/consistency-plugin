@@ -252,9 +252,10 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 //            if (!appending) {
 //                build.addAction(trAction);
 //            }
-
-				if (checksResult.getConfig().getEntries().size() > 0
-						|| checksResult.getParseErrorTestSets().size() > 0) {
+				
+				if (checksResult != null && checksResult.getConfig() != null && checksResult.getConfig().getEntries() != null &&
+						(checksResult.getConfig().getEntries().size() > 0
+						|| checksResult.getParseErrorTestSets().size() > 0)) {
 					// create an individual report for all of the results and add it to
 					// the build
 
@@ -291,7 +292,7 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 //				}
 
 				} else {
-					logger.println("Found matching files but did not find any TAP results.");
+					logger.println("Found matching files but did not find any consistency checks results.");
 					return Boolean.TRUE;
 				}
 			} else {
@@ -300,7 +301,7 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 
 			logger.println("Consistency Checking: FINISH");
 		} else {
-			logger.println("Build result is not better or equal unstable. Skipping TAP publisher.");
+			logger.println("Build result is not better or equal unstable. Skipping consistency checking.");
 		}
 		return Boolean.TRUE;
 	}

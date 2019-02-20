@@ -58,11 +58,35 @@ public class Node {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append("Node: " + name + ", of type: " + type + " with optional parameter: " + optional + "." + "\r\n");
+			sb.append("Node: " + fix(name) + ", of type: " + fix(type) + " with optional parameter: " + optional + ".");
 			for(Node c : this.children) {
 				sb.append(c.toString() + "\r\n");
 			}
 			return sb.toString(); 
+		}
+		
+		public String fix(String toFix) {
+			return toFix.trim().replace("\n", "").replace("\r", "");
+		}
+		
+		public String toGraphviz() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("digraph G { ");
+			sb.append(toSubGraphviz());				
+			sb.append(" }");
+			
+			return sb.toString();
+		}
+		
+		public String toSubGraphviz() {
+			StringBuilder sb = new StringBuilder();
+			
+			for(Node c : this.children) {
+				sb.append("\"" + fix(this.name) + "\" -> \"" + fix(c.name) + "\" \r\n");
+				sb.append(c.toSubGraphviz());
+			}
+			
+			return sb.toString();
 		}
 		
 		/**

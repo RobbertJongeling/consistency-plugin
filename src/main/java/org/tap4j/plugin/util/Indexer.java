@@ -42,7 +42,7 @@ public final class Indexer {
     		//TODO extend to other file extensions
     		String location = build.getParent().getRootDir() + "/workspace/";
     		File workspace = new File(location);
-    		for(File f : FileUtils.listFiles(workspace, new RegexFileFilter("(^.*uml)|(^.*slx)"), DirectoryFileFilter.DIRECTORY)) {
+    		for(File f : FileUtils.listFiles(workspace, new RegexFileFilter("(^.*uml)|(^.*slx)|(^.*mdl)"), DirectoryFileFilter.DIRECTORY)) {
     			toReturn.add(f.getAbsolutePath().substring(location.length()));
     		}	
     	}
