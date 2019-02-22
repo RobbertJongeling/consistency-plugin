@@ -6,6 +6,7 @@ import org.tap4j.plugin.TapProjectAction.Config;
 import org.tap4j.plugin.TapProjectAction.ConsistencyRuleEntry;
 import org.tap4j.plugin.TapProjectAction.Entry;
 import org.tap4j.plugin.model.CheckResult;
+import org.tap4j.plugin.model.CheckResultEnum;
 import org.tap4j.plugin.model.CheckStrictness;
 import org.tap4j.plugin.model.CheckType;
 import org.tap4j.plugin.model.ModelElement;
@@ -68,29 +69,25 @@ public class ConsistencyChecksRunner {
 			Node treeA = transform(cre.getA());
 			Node treeB = transform(cre.getB());
 			logger.println("Completed transformations, running comparisons");			
-			
-			GraphComparator gc = new GraphComparator(treeA, treeB);
-			gc.doCompare(cre.getChecktype(), cre.getStrictness());
-			logger.println("Completed comparisons");	
 						
-			CheckResult result = gc.getResult();
-			String resultText = gc.getResultText();
+			CheckResult thisresult = GraphComparer.doCompare(treeA, treeB, cre.getChecktype(), cre.getStrictness());
+			logger.println("Completed comparisons");	
 
-			cre.setResult(result);
+			cre.setResult(thisresult.getResult());
 
 			// if the result was the same and the test was muted, then actually mute
 			if (cre.getMute()) {
 				logger.println("check muted, old text: " + cre.getResultText());
-				if (cre.getResultText().equals(resultText)) {
+				if (cre.getResultText().equals(thisresult.getMessage())) {
 					logger.println("Setting check result to Mute");
-					cre.setResult(CheckResult.MUTE);
+					cre.setResult(CheckResultEnum.MUTE);
 				}
 			}
 
-			cre.setResultText(resultText);
+			cre.setResultText(thisresult.getMessage());
 
 		} else {
-			cre.setResult(CheckResult.SKIP);
+			cre.setResult(CheckResultEnum.SKIP);
 			cre.setResultText("Test was skipped");
 		}
 	}
@@ -101,10 +98,10 @@ public class ConsistencyChecksRunner {
 		switch(m.getModelType()) {
 		case "SysML":
 			logger.println("getFile of modelElement: " + m.getFile());
-			transformSysML(workspace + "/" + m.getFile(), m.getFqn());
+			toReturn = transformSysML(workspace + "/" + m.getFile(), m.getFqn());
 			break;
 		case "Simulink":
-			transformSimulink(workspace + "/" + m.getFile(), m.getFqn());
+			toReturn = transformSimulink(workspace + "/" + m.getFile(), m.getFqn());
 			break;
 		}
 		

@@ -3,7 +3,7 @@ package org.tap4j.plugin.model;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Node {
+public class Node implements Comparable<Node> {
 
 		public String type;
 		public String name;
@@ -42,6 +42,11 @@ public class Node {
 		public void removeChild(Node child) {
 			children.remove(child);
 		}
+
+		@Override
+		public int compareTo(Node o) {
+			return this.name.compareTo(o.name);
+		}	
 		
 		@Override
 		public boolean equals(Object o) {
@@ -131,5 +136,5 @@ public class Node {
 						
 			
 			return toReturn;
-		}		
+		}	
 }

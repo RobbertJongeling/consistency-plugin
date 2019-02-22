@@ -50,7 +50,7 @@ import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
-import org.tap4j.plugin.model.CheckResult;
+import org.tap4j.plugin.model.CheckResultEnum;
 import org.tap4j.plugin.model.CheckStrictness;
 import org.tap4j.plugin.model.CheckType;
 import org.tap4j.plugin.model.ModelElement;
@@ -517,11 +517,11 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		private CheckStrictness strictness;
 		private boolean mute;
 		private boolean skip;
-		private CheckResult result;
+		private CheckResultEnum result;
 		private String resultText;
 		
 //		@DataBoundConstructor
-		public ConsistencyRuleEntry(ModelElement a, ModelElement b, CheckType checktype, CheckStrictness strictness, boolean mute, boolean skip, CheckResult result, String resultText) {
+		public ConsistencyRuleEntry(ModelElement a, ModelElement b, CheckType checktype, CheckStrictness strictness, boolean mute, boolean skip, CheckResultEnum result, String resultText) {
 			this.a = a;
 			this.b = b;
 			this.checktype = checktype;
@@ -559,22 +559,22 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			
 			switch(result) {
 			case "PASS":
-				this.result = CheckResult.PASS;
+				this.result = CheckResultEnum.PASS;
 				break;
 			case "FAIL":
-				this.result = CheckResult.FAIL;
+				this.result = CheckResultEnum.FAIL;
 				break;
 			case "NYE":
-				this.result = CheckResult.NYE;
+				this.result = CheckResultEnum.NYE;
 				break;
 			case "SKIP":
-				this.result = CheckResult.SKIP;
+				this.result = CheckResultEnum.SKIP;
 				break;
 			case "MUTE":
-				this.result = CheckResult.MUTE;
+				this.result = CheckResultEnum.MUTE;
 				break;
 			default: 
-				this.result = CheckResult.NYE;
+				this.result = CheckResultEnum.NYE;
 				break;
 			}
 
@@ -629,11 +629,11 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			return skip;
 		}
 		
-		public void setResult(CheckResult newResult) {
+		public void setResult(CheckResultEnum newResult) {
 			this.result = newResult;
 		}
 		
-		public CheckResult getResult() {
+		public CheckResultEnum getResult() {
 			return result;
 		}
 		
@@ -646,7 +646,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		}
 
 		public boolean hasResult() {
-			return result == CheckResult.PASS || result == CheckResult.FAIL;
+			return result == CheckResultEnum.PASS || result == CheckResultEnum.FAIL;
 		}
 		
 		@Extension

@@ -14,7 +14,7 @@ import org.tap4j.parser.Tap13Parser;
 import org.tap4j.plugin.TapProjectAction.Config;
 import org.tap4j.plugin.TapProjectAction.ConsistencyRuleEntry;
 import org.tap4j.plugin.TapProjectAction.Entry;
-import org.tap4j.plugin.model.CheckResult;
+import org.tap4j.plugin.model.CheckResultEnum;
 import org.tap4j.plugin.model.ParseErrorTestSetMap;
 import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.Constants;

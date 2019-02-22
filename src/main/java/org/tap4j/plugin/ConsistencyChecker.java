@@ -46,7 +46,7 @@ import org.tap4j.model.TestSet;
 import org.tap4j.plugin.TapProjectAction.Config;
 import org.tap4j.plugin.TapProjectAction.ConsistencyRuleEntry;
 import org.tap4j.plugin.TapProjectAction.Entry;
-import org.tap4j.plugin.model.CheckResult;
+import org.tap4j.plugin.model.CheckResultEnum;
 import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.Constants;
 import org.tap4j.plugin.util.Indexer;
