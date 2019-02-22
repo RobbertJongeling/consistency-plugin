@@ -12,6 +12,8 @@ import org.tap4j.plugin.model.Node
 import java.io.PrintStream
 import org.eclipse.papyrus.sysml14.sysmlPackage.Literals
 import java.io.File
+import org.eclipse.uml2.uml.UMLPackage
+import org.eclipse.uml2.uml.resource.UMLResource
 
 class SysML2Graph implements Lang2Graph {
 
@@ -33,14 +35,22 @@ class SysML2Graph implements Lang2Graph {
 
 		resourceSet.packageRegistry.put(sysmlPackage.eNS_URI, sysmlPackage.eINSTANCE)
 
+		//added these three lines after https://stackoverflow.com/questions/34055936/how-can-i-load-a-papyrus-uml-model-by-using-java
+		resourceSet.getPackageRegistry().put(UMLPackage.eNS_URI, UMLPackage.eINSTANCE);
+		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(UMLResource.FILE_EXTENSION, UMLResource.Factory.INSTANCE);
+		Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put(UMLResource.FILE_EXTENSION, UMLResource.Factory.INSTANCE);
+	
 //		val prefix = "jar:file:/Applications/Eclipse-P2.app/Contents/Eclipse/plugins/org.eclipse.papyrus.sysml14_1.3.0.jar!/resources/profile/SysML.profile.uml";		
-		val prefix = "SysML.profile.uml";
+		val prefix = "SysML.profile.uml"
+
 		var File file = new File(prefix)
 		logger.println("file exists: " + file.exists + " file can be read: " + file.canRead)
 
 		UMLPlugin.EPackageNsURIToProfileLocationMap.put(sysmlPackage.eNS_URI, URI.createURI(prefix + "#SysML"))
 
 		logger.println("locationmapped: " + UMLPlugin.EPackageNsURIToProfileLocationMap.get(sysmlPackage.eNS_URI))
+		
+		
 	}
 
 	override Node doTransform() {
@@ -49,7 +59,7 @@ class SysML2Graph implements Lang2Graph {
 //  	var Node m = new Node("testSysMLTypeChild", "testSysMLNameChild", "testSysMLOptionalChild")
 //  	n.addChild(m)
 // 		return n
-		val resource = resourceSet.getResource(URI.createURI(filePath), true)
+		val resource = resourceSet.getResource(URI.createFileURI(filePath), true)
 		logger.println("created resource for uri: " + filePath + ". resource: " + resource)
 		return resource.tree
 	}
@@ -63,6 +73,10 @@ class SysML2Graph implements Lang2Graph {
 		var Node toReturn = new Node("null", "null", "null")
 
 		logger.println("resource contents length: " + resource.contents.length)
+		for (Object o : resource.contents) {
+			logger.println("resource content: " + o.toString)
+		}
+
 
 		for (model : resource.contents.filter(org.eclipse.uml2.uml.Model)) {
 			if (true /*model.name == fqn*/ ) { // == maps to Object.equals in Xtend //FOR TESTING, ALWAYS MATCH MODEL TOTO FIX
@@ -89,9 +103,9 @@ class SysML2Graph implements Lang2Graph {
 						// serialize containing classes
 						for (c : pkg.ownedElements.filter(org.eclipse.uml2.uml.Class)) {
 							logger.println("class " + c.name + "; stereotype: " + c.appliedStereotypes.toString)
-							if (c.getAppliedStereotype("SysML::Blocks::Block") !== null) {
+//							if (c.getAppliedStereotype("SysML::Blocks::Block") !== null) {
 								toReturn.addChild(getTree(c, pkg.name))
-							}
+//							}
 						}
 					}
 				}
@@ -103,22 +117,24 @@ class SysML2Graph implements Lang2Graph {
 						// serialize containing classes
 						for (c : clazz.ownedElements.filter(org.eclipse.uml2.uml.Class)) {
 							logger.println("class " + c.name + "; stereotype: " + c.appliedStereotypes.toString)
-							if (c.getAppliedStereotype("SysML::Blocks::Block") !== null) {
+//							if (c.getAppliedStereotype("SysML::Blocks::Block") !== null) {
 								toReturn.addChild(getTree(c, clazz.name))
-							}
+//							}
 						}
 
 						// add all ports
 						for (p : clazz.ownedElements.filter(org.eclipse.uml2.uml.Port)) {
 							logger.println("port " + p.name + "; stereotype: " + p.appliedStereotypes.toString)
-							val fps = p.getAppliedStereotype("SysML::DeprecatedElements::FlowPort")
-							if (fps !== null) {
-								val fp = p.getStereotypeApplication(fps) as FlowPort
+//							val fps = p.getAppliedStereotype("SysML::DeprecatedElements::FlowPort")
+//							if (fps !== null) {
+//								val fp = p.getStereotypeApplication(fps) as FlowPort
 								val typename = if(p.type === null) "" else p.type.name
 								toReturn.addChild(
-									new Node(toFirstUpper(fp.direction.getName()) + "port", clazz.name + "/" + p.name,
-										"Bus: " + typename))
-							}
+//									new Node(toFirstUpper(fp.direction.getName()) + "port", clazz.name + "/" + p.name,
+//										"Bus: " + typename))
+//									new Node("xPort", clazz.name + "/" + p.name, "Bus: " + typename))
+									new Node("Port", p.name))
+//							}
 						}
 					}
 				}
@@ -149,7 +165,8 @@ class SysML2Graph implements Lang2Graph {
 		var Node toReturn
 
 		val name = prefix + "/" + pkg.name
-		toReturn = new Node("SubSystem", name)
+//		toReturn = new Node("SubSystem", name)
+		toReturn = new Node("SubSystem", pkg.name)
 
 		// recursively check for containing packages
 		for (p : pkg.ownedElements.filter(org.eclipse.uml2.uml.Package)) {
@@ -159,14 +176,14 @@ class SysML2Graph implements Lang2Graph {
 		// serialize containing classes
 		for (c : pkg.ownedElements.filter(org.eclipse.uml2.uml.Class)) {
 
-			val blockStereotype = c.getAppliedStereotype("SysML::Blocks::Block")
-			if (blockStereotype !== null) {
-				val block = c.getStereotypeApplication(blockStereotype)
-				logger.println(c.name + ": block stereotype: " + block.toString())
-			} else {
-				logger.println(c.name + ": getStereotypeApplication is null")
-			}
-			logger.println("class " + c.name + "; stereotype: " + c.appliedStereotypes.toString)
+//			val blockStereotype = c.getAppliedStereotype("SysML::Blocks::Block")
+//			if (blockStereotype !== null) {
+//				val block = c.getStereotypeApplication(blockStereotype)
+//				logger.println(c.name + ": block stereotype: " + block.toString())
+//			} else {
+//				logger.println(c.name + ": getStereotypeApplication is null")
+//			}
+//			logger.println("class " + c.name + "; stereotype: " + c.appliedStereotypes.toString)
 //			if(c.getAppliedStereotype("SysML::Blocks::Block") !== null) {
 			toReturn.addChild(getTree(c, name))
 //			}
@@ -182,26 +199,29 @@ class SysML2Graph implements Lang2Graph {
 		var Node toReturn
 
 		val name = prefix + "/" + clazz.name
-		toReturn = new Node("SubSystem", name)
+//		toReturn = new Node("SubSystem", name)
+		toReturn = new Node("SubSystem", clazz.name)
 
 		// add all ports
 		for (p : clazz.ownedElements.filter(org.eclipse.uml2.uml.Port)) {
-			logger.println("port " + p.name + "; stereotype: " + p.appliedStereotypes.toString)
-			val fps = p.getAppliedStereotype("SysML::DeprecatedElements::FlowPort")
-			if (fps !== null) {
-				val fp = p.getStereotypeApplication(fps) as FlowPort
+//			logger.println("port " + p.name + "; stereotype: " + p.appliedStereotypes.toString)
+//			val fps = p.getAppliedStereotype("SysML::DeprecatedElements::FlowPort")
+//			if (fps !== null) {
+//				val fp = p.getStereotypeApplication(fps) as FlowPort
 				val typename = if(p.type === null) "" else p.type.name
 				toReturn.addChild(
-					new Node(toFirstUpper(fp.direction.getName()) + "port", name + "/" + p.name + "-Bus: " + typename))
-			}
+//					new Node(toFirstUpper(fp.direction.getName()) + "port", name + "/" + p.name + "-Bus: " + typename))
+//					new Node("xPort", name + "/" + p.name + "-Bus: " + typename))
+					new Node("Port", p.name))
+//			}
 		}
 
 		// recursively add all subsystems and subsubsystems etc.
 		for (c : clazz.allOwnedElements.filter(org.eclipse.uml2.uml.Class)) {
 			logger.println("class " + c.name + "; stereotype: " + c.appliedStereotypes.toString)
-			if (c.getAppliedStereotype("SysML::Blocks::Block") !== null) {
+//			if (c.getAppliedStereotype("SysML::Blocks::Block") !== null) {
 				toReturn.addChild(getTree(c, name))
-			}
+//			}
 		}
 
 		return toReturn

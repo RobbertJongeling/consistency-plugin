@@ -46,7 +46,8 @@ public class Simulink2Graph implements Lang2Graph {
     String _name = block.getName();
     String name = ((prefix + "/") + _name);
     String _type = block.getType();
-    Node toReturn = new Node(_type, name);
+    String _name_1 = block.getName();
+    Node toReturn = new Node(_type, _name_1);
     UnmodifiableCollection<SimulinkBlock> _subBlocks = block.getSubBlocks();
     for (final SimulinkBlock b : _subBlocks) {
       toReturn.addChild(this.getTree(b, name));
