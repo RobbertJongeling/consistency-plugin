@@ -44,15 +44,15 @@ public class GraphComparer {
 	}
 	
 	public static CheckResult doCompareStrictEquivalence(Node a, Node b) {
-		if(!a.name.equals(b.name)) {
-			return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.toString() + " is unequal to Node: " + b.toString());
+		if(!a.displayName.equals(b.displayName)) {
+			return new CheckResult(CheckResultEnum.FAIL, a.fqn + "(" + a.displayName + ") is unequal to: " + b.fqn + "(" + b.displayName + ")");
 		} else {
 			//compare the children, but we don't know the order, so sort first
 			Collections.sort(a.children);
 			Collections.sort(b.children);
 			
 			if(a.children.size() != b.children.size()) {
-				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.toString() + " and Node: " + b.toString() + " have unequal amount of children");
+				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " and Node: " + b.fqn + " have unequal amount of children");
 			} else {
 				for(int i = 0; i<a.children.size(); i++) {
 					CheckResult recRes = doCompareStrictEquivalence(a.children.get(i), b.children.get(i));
@@ -60,7 +60,7 @@ public class GraphComparer {
 						return recRes;
 					}
 				}
-				return new CheckResult(CheckResultEnum.PASS, "Node: " + a.toString() + " is strictly equivalent to Node: " + b.toString());
+				return new CheckResult(CheckResultEnum.PASS, "Node: " + a.fqn + " is strictly equivalent to Node: " + b.fqn);
 			}
 		}		
 	}

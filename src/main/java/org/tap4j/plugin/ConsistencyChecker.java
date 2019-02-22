@@ -149,7 +149,7 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 	public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher,
 			@Nonnull TaskListener listener) throws InterruptedException, IOException {
 
-		performImpl(run, workspace, listener);
+		performImpl(run, workspace.toString(), listener);
 	}
 
 	/**
@@ -163,7 +163,7 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	private boolean performImpl(Run<?, ?> build, FilePath workspace, TaskListener listener)
+	private boolean performImpl(Run<?, ?> build, String workspace, TaskListener listener)
 			throws IOException, InterruptedException {
 		final PrintStream logger = listener.getLogger();
 		if (isPerformChecker(build)) {

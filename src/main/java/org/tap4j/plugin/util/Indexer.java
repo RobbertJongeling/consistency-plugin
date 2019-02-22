@@ -7,16 +7,26 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.tap4j.plugin.ConsistencyChecksResult;
+import org.tap4j.plugin.GraphTransformer;
+import org.tap4j.plugin.model.ModelElement;
+import org.tap4j.plugin.model.Node;
 
+import hudson.FilePath;
 import hudson.XmlFile;
 import hudson.model.Run;
 import jenkins.model.Jenkins;
 
 public final class Indexer {
+	
+
+	private static final Logger LOGGER = Logger.getLogger(ConsistencyChecksResult.class.getName());
 
 	public static void indexFilesAndElements(Run<?, ?> build) throws IOException {
 		XmlFile allModels = new XmlFile(new File(Jenkins.getInstance().getRootDir(), ("/allModels.xml")));
@@ -63,9 +73,13 @@ public final class Indexer {
 	    		toReturn.put(mf, Arrays.asList(mf+":element a", mf+":element b", mf+":element c"));
 	    	}
     	} else {
-    		//TODO implement
     		for(String mf : modelFiles) {
-	    		toReturn.put(mf, Arrays.asList(mf+":element a", mf+":element b", mf+":element c"));
+    			String modelType = mf.endsWith("uml") ? "SysML" : "Simulink"; //TODO fix ugly hardcoded
+    			ModelElement m = new ModelElement(modelType, mf, "");
+    			LOGGER.log(Level.INFO, "INDEXER: Going to transform: " + build.getParent().getRootDir() + "/workspace/" + m.toString());
+    			Node transformed = GraphTransformer.transform(build.getParent().getRootDir() + "/workspace/", m);
+    			LOGGER.log(Level.INFO, "INDEXER: Done transforming: " + transformed.toGraphviz());
+    			toReturn.put(mf, transformed.toListOfString());
 	    	}
     	}
     	

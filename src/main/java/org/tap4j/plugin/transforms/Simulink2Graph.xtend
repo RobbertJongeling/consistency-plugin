@@ -6,6 +6,9 @@ import org.conqat.lib.commons.logging.SimpleLogger
 import org.conqat.lib.simulink.model.SimulinkModel
 import org.conqat.lib.simulink.builder.SimulinkModelBuilder
 import org.conqat.lib.simulink.model.SimulinkBlock
+import java.util.LinkedList
+import java.util.List
+import org.conqat.lib.commons.collections.UnmodifiableCollection
 
 class Simulink2Graph implements Lang2Graph {
 
@@ -23,24 +26,46 @@ class Simulink2Graph implements Lang2Graph {
 
 	override doTransform() {
 		var File file = new File(filePath)
-		var Node root = new Node("null", "null", "null")
 		
 		var SimulinkModelBuilder builder = new SimulinkModelBuilder(file, new SimpleLogger())
 		var SimulinkModel model = builder.buildModel()
 
-		root = new Node("model", model.name, "opt")
-			
-		for (SimulinkBlock block : model.subBlocks) {
-			root.addChild(getTree(block, model.name))
+		return getTree(model);
+	}
+	
+	def Node getTree(SimulinkModel model) {
+		if(fqn == "" || model.name == fqn) {		
+			var Node root = new Node("model", model.name, model.name, "opt")
+			for (SimulinkBlock block : model.subBlocks) {
+				root.addChild(getTree(block, model.name))
+			}
+			return root
+		} else {
+			return getTreeFromTopBlock(model.subBlocks, model.name)
 		}
-		
-		return root
+	}
+	
+	def Node getTreeFromTopBlock(UnmodifiableCollection<SimulinkBlock> subblocks, String prefix) {
+		if(subblocks !== null && subblocks.size > 0) {
+			for(SimulinkBlock b : subblocks) {
+				if(prefix + "/" + b.name == fqn) {
+					return getTree(b, prefix);
+				} else {
+					var Node n = getTreeFromTopBlock(b.subBlocks, prefix + "/" + b.name)
+					if(n !== null) {
+						return n
+					}
+				}
+			}
+		} else {
+			return null
+		}
 	}
 
 	def Node getTree(SimulinkBlock block, String prefix) {
 		var String name = prefix + "/" + block.name
 //		var Node toReturn = new Node(block.type, name)
-		var Node toReturn = new Node(block.type, block.name)
+		var Node toReturn = new Node(block.type, name, block.name)
 
 //		for (ip : block.inPorts) {
 //			toReturn.addChild(new Node("inport", prefix + "/" + ip.index))

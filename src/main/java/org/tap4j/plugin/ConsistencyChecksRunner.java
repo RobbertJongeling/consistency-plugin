@@ -21,9 +21,9 @@ public class ConsistencyChecksRunner {
 
 	private ConsistencyChecksResult ccr;
 	private PrintStream logger;
-	private FilePath workspace;
+	private String workspace;
 
-	public ConsistencyChecksRunner(FilePath workspace, ConsistencyChecksResult ccr, PrintStream logger) {
+	public ConsistencyChecksRunner(String workspace, ConsistencyChecksResult ccr, PrintStream logger) {
 		this.workspace = workspace;
 		this.ccr = ccr;
 		this.logger = logger;
@@ -66,8 +66,12 @@ public class ConsistencyChecksRunner {
 			logger.println("Running CRE: " + cre.toString());
 
 			logger.println("Running transformations.");
-			Node treeA = transform(cre.getA());
-			Node treeB = transform(cre.getB());
+			Node treeA = GraphTransformer.transform(logger, workspace, cre.getA());
+			logger.println("done transforming: " + cre.getA().getFile());
+			logger.println(treeA.toGraphviz());
+			Node treeB = GraphTransformer.transform(logger, workspace, cre.getB());
+			logger.println("done transforming: " + cre.getB().getFile());
+			logger.println(treeB.toGraphviz());
 			logger.println("Completed transformations, running comparisons");			
 						
 			CheckResult thisresult = GraphComparer.doCompare(treeA, treeB, cre.getChecktype(), cre.getStrictness());
@@ -90,39 +94,5 @@ public class ConsistencyChecksRunner {
 			cre.setResult(CheckResultEnum.SKIP);
 			cre.setResultText("Test was skipped");
 		}
-	}
-	
-	private Node transform(ModelElement m) {
-		Node toReturn = null;
-		logger.println("transforming model element of type: " + m.getModelType());
-		switch(m.getModelType()) {
-		case "SysML":
-			logger.println("getFile of modelElement: " + m.getFile());
-			toReturn = transformSysML(workspace + "/" + m.getFile(), m.getFqn());
-			break;
-		case "Simulink":
-			toReturn = transformSimulink(workspace + "/" + m.getFile(), m.getFqn());
-			break;
-		}
-		
-		return toReturn;
-	}
-	
-	private Node transformSysML(String filepath, String fqn) {
-		SysML2Graph s2g = new SysML2Graph(logger, filepath, fqn);
-		Node toReturn = s2g.doTransform();
-//		logger.println("transformed sysml: " + toReturn.name + ":" + toReturn.type + "-(" + toReturn.optional + ")");
-		logger.println(toReturn.toString());
-		logger.println(toReturn.toGraphviz());
-		return toReturn;
-	}
-	
-	private Node transformSimulink(String filepath, String fqn) {
-		Simulink2Graph s2g = new Simulink2Graph(filepath, fqn);
-		Node toReturn = s2g.doTransform();
-//		logger.println("transformed simulink: " + toReturn.name + ":" + toReturn.type + "-(" + toReturn.optional + ")");
-		logger.println(toReturn.toString());
-		logger.println(toReturn.toGraphviz());
-		return toReturn;
 	}
 }

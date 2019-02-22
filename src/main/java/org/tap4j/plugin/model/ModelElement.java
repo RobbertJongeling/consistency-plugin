@@ -35,5 +35,9 @@ public class ModelElement {
 		this.fqn = fqn;
 	}
 	
+	@Override
+	public String toString() {
+		return "model of type: " + modelType + ", defined in file: " + file + ", top-level-FQN: " + fqn; 
+	}
 	
 }

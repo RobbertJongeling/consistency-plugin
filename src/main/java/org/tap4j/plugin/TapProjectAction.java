@@ -669,7 +669,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			XmlFile allModelElements = new XmlFile(new File(Jenkins.getInstance().getRootDir(), ("/allModelElements.xml")));
 			
 			@SuppressWarnings("unchecked")
-			public ListBoxModel doFillFileItems() {
+			public ListBoxModel doFillFileItems(String modelType) {
 				ListBoxModel toReturn = new ListBoxModel();				
 				
 				List<String> allModelFiles = new LinkedList<String>();
@@ -677,16 +677,31 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 					allModelFiles = (List<String>) allModels.unmarshal(allModelFiles);
 				} catch (IOException e) {
 					try {
-						Indexer.indexFilesAndElements(null);//TODO I think this can not work, since we have to access the workspace
-						return doFillFileItems();
+						//TODO I think this can not work, since we have to access the workspace
+						Indexer.indexFilesAndElements(null);
+						return doFillFileItems(modelType);
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 				}				
 								
+				List<String> exts = new LinkedList<>();
+				switch(modelType) {
+					case "SysML":
+						exts.add("uml");
+						break;
+					case "Simulink":
+						exts.add("mdl");
+						exts.add("slx");
+						break;
+				}
 				for(String s : allModelFiles) {
-					toReturn.add(s);
+					for(String ext : exts) {
+						if(s.endsWith(ext)) {
+							toReturn.add(s);							
+						}
+					}
 				}
 				return toReturn;
 			}
@@ -705,12 +720,12 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 
 			//TODO would be nice to use the modeltype input as queryParameter for the files
 			// s.t. if you select Simulink, only .slx is showing, For SysML only .uml etc.
-			public ListBoxModel doFillFileAItems() {
-				return doFillFileItems();
+			public ListBoxModel doFillFileAItems(@QueryParameter String typeA) {
+				return doFillFileItems(typeA);
 			}
 			
-			public ListBoxModel doFillFileBItems() {
-				return doFillFileItems();
+			public ListBoxModel doFillFileBItems(@QueryParameter String typeB) {
+				return doFillFileItems(typeB);
 			}					
 			
 			public ListBoxModel doFillFqnAItems(@QueryParameter String fileA) {
@@ -721,6 +736,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 				return getFqnListBoxModel(fileB);
 			}
 			
+			@SuppressWarnings("unchecked")
 			public ListBoxModel getFqnListBoxModel(String file) {
 				ListBoxModel toReturn = new ListBoxModel();
 				

@@ -6,28 +6,30 @@ import java.util.List;
 public class Node implements Comparable<Node> {
 
 		public String type;
-		public String name;
+		public String fqn;
+		public String displayName;
 		public String optional;
 		public List<Node> children;
 
 		Node() {
-		  this("default", "default");
+		  this("default", "default", "default");
 		}
 		
 		
-		public Node(String type, String name) {
-			this(type, name, "");
+		public Node(String type, String fqn, String displayName) {
+			this(type, fqn, displayName, "");
 		}
 		
-		public Node(String type, String name, String optional) {
-			this.type = type;
-			this.name = name;
-			this.optional = optional;
+		public Node(String type, String fqn, String displayName, String optional) {
+			this.type = fix(type);
+			this.fqn = fix(fqn);
+			this.displayName = fix(displayName);
+			this.optional = fix(optional);
 			this.children = new LinkedList<Node>();
 		}
 		
-		public Node(String type, String name, List<Node> children) {
-			this(type, name);			
+		public Node(String type, String fqn, String displayName, List<Node> children) {
+			this(type, fqn, displayName);			
 			this.children.addAll(children);
 		}
 		
@@ -45,14 +47,14 @@ public class Node implements Comparable<Node> {
 
 		@Override
 		public int compareTo(Node o) {
-			return this.name.compareTo(o.name);
+			return this.displayName.compareTo(o.displayName);
 		}	
 		
 		@Override
 		public boolean equals(Object o) {
 			if(o instanceof Node) {
 				Node n = (Node) o;
-				if(n.type.equals(this.type) && n.name.equals(this.name)) {
+				if(n.type.equals(this.type) && n.displayName.equals(this.displayName)) {
 					//ignoring children for now, since the type+name should uniquely identify a node anyway
 					return true; 
 				}
@@ -63,7 +65,7 @@ public class Node implements Comparable<Node> {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append("Node: " + fix(name) + ", of type: " + fix(type) + " with optional parameter: " + optional + ".");
+			sb.append("Node: " + displayName + ", of type: " + type + " with optional parameter: " + optional + ".");
 			for(Node c : this.children) {
 				sb.append(c.toString() + "\r\n");
 			}
@@ -71,7 +73,18 @@ public class Node implements Comparable<Node> {
 		}
 		
 		public String fix(String toFix) {
-			return toFix.trim().replace("\n", "").replace("\r", "");
+			return toFix.replace(" ", "").replace("\n", "").replace("\r", "");
+		}
+		
+		public List<String> toListOfString() {
+			List<String> toReturn = new LinkedList<>();
+			
+			toReturn.add(fqn);
+			for(Node c : this.children) {
+				toReturn.addAll(c.toListOfString());
+			}
+			
+			return toReturn;
 		}
 		
 		public String toGraphviz() {
@@ -87,7 +100,7 @@ public class Node implements Comparable<Node> {
 			StringBuilder sb = new StringBuilder();
 			
 			for(Node c : this.children) {
-				sb.append("\"" + fix(this.name) + "\" -> \"" + fix(c.name) + "\" \r\n");
+				sb.append("\"" + this.displayName + "\" -> \"" + c.displayName + "\" \r\n");
 				sb.append(c.toSubGraphviz());
 			}
 			
