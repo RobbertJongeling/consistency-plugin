@@ -81,9 +81,9 @@ public class GraphHelper
     public static JFreeChart createChart(StaplerRequest req, CategoryDataset dataset) {
 
       final JFreeChart chart = ChartFactory.createStackedAreaChart(
-          "TAP Tests",                     // chart title
+          "Consistency Checks",                     // chart title
           null,                     // unused
-          "TAP Tests Count",            // range axis label
+          "Consistency Checks Count",            // range axis label
           dataset,                  // data
           PlotOrientation.VERTICAL, // orientation
           true,                     // include legend

@@ -108,13 +108,13 @@ public class Node implements Comparable<Node> {
 			return sb.toString();
 		}
 		
-		public List<String> toNumberChildrenList(PrintStream logger) {
+		public List<String> toNumberChildrenList() {
 			List<String> toReturn = new LinkedList<>();
 			
 			int a = this.children.size();
 			//recursively get the list of numbers for the children, then prepend to all strings the nr on this level
 			for(Node c : this.children) {
-				toReturn.addAll(c.toNumberChildrenList(logger));				
+				toReturn.addAll(c.toNumberChildrenList());				
 			}
 			//if no childdren, then we reached the bottom and we initialize the list with a 0
 			if(toReturn.size() == 0) {
@@ -131,48 +131,27 @@ public class Node implements Comparable<Node> {
 			
 			return toReturn;
 		}
-		
-		/**
-		 * 
-		 * @param other
-		 * @return empty list if no inconsistencies found, else a list of them.
-		 */
-		public List<String> getInconsistenciesWith(Node other) {
-			List<String> toReturn = new LinkedList<String>();
+
+		//not absolute fqns, but qns starting from this node
+		public List<String> toLeafFQNList() {
+			List<String> toReturn = new LinkedList<>();
+			toReturn.add(displayName);
 			
-			if(this.type != other.type) {
-				toReturn.add("the type of " + this.toString() + " and " + other.toString() + " are not equal.");
+			for(Node c : children) {
+				toReturn.addAll(c.toLeafFQNList(displayName));
 			}
-			
-			//Now check children
-			for(Node child : this.children) {
-				boolean found = false;
-				for(Node otherChild : other.children) {
-					if(child.type == otherChild.type) {
-						found = true;
-					}
-				}
-				if(!found) {
-					toReturn.add("the children of " + other.toString() + " do not contain a node of type " + child.type);
-				}
-			}
-			
-			//Check children symmetrically the other way
-			for(Node child : this.children) {
-				boolean found = false;
-				for(Node otherChild : other.children) {
-					if(child.type == otherChild.type) {
-						found = true;
-					}
-				}
-				if(!found) {
-					toReturn.add("the children of " + other.toString() + " do not contain a node of type " + child.type);
-				}
-			}
-			
-			//now recursively check matched children somehow?
-						
 			
 			return toReturn;
-		}	
+		}
+		
+		private List<String> toLeafFQNList(String prefix) {
+			List<String> toReturn = new LinkedList<>();
+			String qn = prefix + "/" + displayName;
+			toReturn.add(qn);
+			for(Node c : children) {
+				toReturn.addAll(c.toLeafFQNList(qn));
+			}
+			
+			return toReturn;
+		}
 }

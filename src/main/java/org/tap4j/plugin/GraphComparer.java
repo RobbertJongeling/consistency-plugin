@@ -83,17 +83,17 @@ public class GraphComparer {
 		if(a.children.size() != b.children.size()) {
 			return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " and Node: " + b.fqn + " have unequal amount of children");			
 		} else {
-			List<String> nrChildrenTreeA = a.toNumberChildrenList(logger);
-			List<String> nrChildrenTreeB = b.toNumberChildrenList(logger);
+			List<String> nrChildrenTreeA = a.toNumberChildrenList();
+			List<String> nrChildrenTreeB = b.toNumberChildrenList();
 			
-			logger.println("nr children tree A:");
-			for(String s : nrChildrenTreeA) {
-				logger.println(s);
-			}
-			logger.println("nr children tree B:");
-			for(String s : nrChildrenTreeB) {
-				logger.println(s);
-			}
+//			logger.println("nr children tree A:");
+//			for(String s : nrChildrenTreeA) {
+//				logger.println(s);
+//			}
+//			logger.println("nr children tree B:");
+//			for(String s : nrChildrenTreeB) {
+//				logger.println(s);
+//			}
 			
 			if(!(nrChildrenTreeA.containsAll(nrChildrenTreeB) && nrChildrenTreeB.containsAll(nrChildrenTreeA))) {
 				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " and Node: " + b.fqn + " are not loosely equivalent.");
@@ -102,13 +102,37 @@ public class GraphComparer {
 		return new CheckResult(CheckResultEnum.PASS, "Node: " + a.fqn + " and Node: " + b.fqn + " are loosely equivalent.");
 	}
 	
+	// the idea here is to get the fqn of each leaf, then check if a contains all of b.
+	// similar to the compare loose refinement, and less precise in error reporting than strict equivalence 
+	// (which could have been done in the same way but didn't to enhance error reporting)
 	private static CheckResult doCompareStrictRefinement(PrintStream logger, Node a, Node b) {
-		//TODO implement
-		return new CheckResult(CheckResultEnum.PASS, "stub");
+		if(!a.displayName.equals(b.displayName)) {
+			return new CheckResult(CheckResultEnum.FAIL, a.fqn + "(" + a.displayName + ") is unequal to: " + b.fqn + "(" + b.displayName + ")");
+		} else {
+			List<String> leafFqnsA = a.toLeafFQNList();
+			List<String> leafFqnsB = b.toLeafFQNList();
+			
+//			logger.println("leaf FQNs tree A:");
+//			for(String s : leafFqnsA) {
+//				logger.println(s);
+//			}
+//			logger.println("leaf FQNs tree B:");
+//			for(String s : leafFqnsB) {
+//				logger.println(s);
+//			}
+			
+			if(!(leafFqnsA.containsAll(leafFqnsB))) {
+				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " does not strictly refine Node: " + b.fqn);
+			} else {
+				return new CheckResult(CheckResultEnum.PASS, "Node: " + a.fqn + " strictly refines Node: " + b.fqn);			
+			}
+		}	
 	}
 	
+	//if a refines b, then a should contain at least all children of b. 
+	//in terms of these nrChildrentrees, it means that the numbers in a should be >= those in b
 	private static CheckResult doCompareLooseRefinement(PrintStream logger, Node a, Node b) {
-		//TODO implement
-		return new CheckResult(CheckResultEnum.PASS, "stub");
-	}	
+		//TODO implement, but maybe not worth doing at all, since it is so vague that it probably doesn't help anyone 
+		return new CheckResult(CheckResultEnum.PASS, "Stub");			
+	}
 }
