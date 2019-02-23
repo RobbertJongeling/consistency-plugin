@@ -78,7 +78,7 @@ public class ConsistencyChecksRunner {
 			}
 			logger.println("Completed transformations, running comparisons");			
 						
-			CheckResult thisresult = GraphComparer.doCompare(treeA, treeB, cre.getChecktype(), cre.getStrictness());
+			CheckResult thisresult = GraphComparer.doCompare(logger, treeA, treeB, cre.getChecktype(), cre.getStrictness());
 			logger.println("Completed comparisons");	
 
 			cre.setResult(thisresult.getResult());

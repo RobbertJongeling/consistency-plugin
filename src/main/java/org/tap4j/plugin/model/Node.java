@@ -1,5 +1,6 @@
 package org.tap4j.plugin.model;
 
+import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -107,21 +108,24 @@ public class Node implements Comparable<Node> {
 			return sb.toString();
 		}
 		
-		public List<String> toNumberChildrenList() {
+		public List<String> toNumberChildrenList(PrintStream logger) {
 			List<String> toReturn = new LinkedList<>();
 			
 			int a = this.children.size();
 			//recursively get the list of numbers for the children, then prepend to all strings the nr on this level
 			for(Node c : this.children) {
-				toReturn.addAll(c.toNumberChildrenList());				
+				toReturn.addAll(c.toNumberChildrenList(logger));				
 			}
 			//if no childdren, then we reached the bottom and we initialize the list with a 0
 			if(toReturn.size() == 0) {
 				toReturn.add("0");
 			} else {
 				//else: prepend the nr of children on this level
-				for(String s : toReturn) {
-					s = a + s; 
+				List<String> tmp = new LinkedList<>();
+				tmp.addAll(toReturn);
+				toReturn.clear();
+				for(String s : tmp) {
+					toReturn.add(a + s); 
 				}
 			}
 			

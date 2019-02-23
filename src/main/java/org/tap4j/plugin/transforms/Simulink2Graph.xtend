@@ -48,22 +48,14 @@ class Simulink2Graph implements Lang2Graph {
 	}
 	
 	def Node getTreeFromTopBlock(UnmodifiableCollection<SimulinkBlock> subblocks, String prefix) {
-		logger.println("getTreeFromTopBlock " + prefix + " sbs lenght: " + subblocks.size)
 		if(subblocks !== null && subblocks.size > 0) {
 			for(SimulinkBlock b : subblocks) {
-				logger.println("checking for: " + b.name)
 				if(fix(prefix + "/" + b.name) == fqn) {
-					logger.println("found the topBlock!")
 					return getTree(b, prefix)
 				} else {
-					logger.println(prefix + "/" + b.name + "!==" + fqn)
-					logger.println("getting tree for subBlock")
 					var Node n = getTreeFromTopBlock(b.subBlocks, prefix + "/" + b.name)
 					if(n !== null) {
-						logger.println("tree from subBlock is not null, found the correct top block!")
 						return n
-					} else {
-						logger.println("tree from subBlock is null")
 					}
 				}
 			}
