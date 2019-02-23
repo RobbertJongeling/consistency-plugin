@@ -9,17 +9,19 @@ import org.conqat.lib.simulink.model.SimulinkBlock
 import java.util.LinkedList
 import java.util.List
 import org.conqat.lib.commons.collections.UnmodifiableCollection
+import java.util.logging.Level
+import java.util.logging.Logger
+import org.tap4j.plugin.ConsistencyChecksResult
+import java.io.PrintStream
 
 class Simulink2Graph implements Lang2Graph {
 
-	// somehow, this should maybe create a script that is ran inside matlab?
-	// let's google if there are alternatives
-	// https://www.cqse.eu/en/products/simulink-library-for-java/overview/ is the way to go
-	// using it the way these guys do it: https://github.com/cqse/test-analyzer (by creating a local maven repository)
 	var String filePath
 	var String fqn
+	var PrintStream logger
 
-	new(String filepath, String fqn) {
+	new(PrintStream logger, String filepath, String fqn) {
+		this.logger = logger
 		this.filePath = filepath
 		this.fqn = fqn
 	}
@@ -46,20 +48,34 @@ class Simulink2Graph implements Lang2Graph {
 	}
 	
 	def Node getTreeFromTopBlock(UnmodifiableCollection<SimulinkBlock> subblocks, String prefix) {
+		logger.println("getTreeFromTopBlock " + prefix + " sbs lenght: " + subblocks.size)
 		if(subblocks !== null && subblocks.size > 0) {
 			for(SimulinkBlock b : subblocks) {
-				if(prefix + "/" + b.name == fqn) {
-					return getTree(b, prefix);
+				logger.println("checking for: " + b.name)
+				if(fix(prefix + "/" + b.name) == fqn) {
+					logger.println("found the topBlock!")
+					return getTree(b, prefix)
 				} else {
+					logger.println(prefix + "/" + b.name + "!==" + fqn)
+					logger.println("getting tree for subBlock")
 					var Node n = getTreeFromTopBlock(b.subBlocks, prefix + "/" + b.name)
 					if(n !== null) {
+						logger.println("tree from subBlock is not null, found the correct top block!")
 						return n
+					} else {
+						logger.println("tree from subBlock is null")
 					}
 				}
 			}
+			return null
 		} else {
 			return null
 		}
+	}
+	
+	//quick fix, copied from Node
+	def fix(String toFix) {
+		return toFix.replace(" ", "").replace("\n", "").replace("\r", "")
 	}
 
 	def Node getTree(SimulinkBlock block, String prefix) {

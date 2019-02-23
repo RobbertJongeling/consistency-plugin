@@ -107,6 +107,27 @@ public class Node implements Comparable<Node> {
 			return sb.toString();
 		}
 		
+		public List<String> toNumberChildrenList() {
+			List<String> toReturn = new LinkedList<>();
+			
+			int a = this.children.size();
+			//recursively get the list of numbers for the children, then prepend to all strings the nr on this level
+			for(Node c : this.children) {
+				toReturn.addAll(c.toNumberChildrenList());				
+			}
+			//if no childdren, then we reached the bottom and we initialize the list with a 0
+			if(toReturn.size() == 0) {
+				toReturn.add("0");
+			} else {
+				//else: prepend the nr of children on this level
+				for(String s : toReturn) {
+					s = a + s; 
+				}
+			}
+			
+			return toReturn;
+		}
+		
 		/**
 		 * 
 		 * @param other

@@ -610,7 +610,7 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 		}
 		
 		public String getFqnB() {
-			return a.getFqn();
+			return b.getFqn();
 		}
 		
 		public CheckType getChecktype() {

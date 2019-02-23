@@ -7,23 +7,21 @@ import org.tap4j.plugin.model.Node;
 import org.tap4j.plugin.transforms.Simulink2Graph;
 import org.tap4j.plugin.transforms.SysML2Graph;
 
-import hudson.FilePath;
-
 public class GraphTransformer {
 
-	public static Node transform(PrintStream logger, String workspace, ModelElement m) {
-		logger.println("transforming " + m.getFile());
-		return transform(workspace, m);
+	public static Node transform(String workspace, ModelElement m) {
+		return transform(System.out, workspace, m);
 	}
 	
-	public static Node transform(String workspace, ModelElement m) {
-		Node toReturn = null;
+	public static Node transform(PrintStream logger, String workspace, ModelElement m) {
+		logger.println("transforming " + m.getFile());
+		Node toReturn = new Node("","","");
 		switch(m.getModelType()) {
 		case "SysML":
 			toReturn = transformSysML(workspace + "/" + m.getFile(), m.getFqn());
 			break;
 		case "Simulink":
-			toReturn = transformSimulink(workspace + "/" + m.getFile(), m.getFqn());
+			toReturn = transformSimulink(logger, workspace + "/" + m.getFile(), m.getFqn());
 			break;
 		}		
 		return toReturn;
@@ -38,8 +36,8 @@ public class GraphTransformer {
 		return toReturn;
 	}
 	
-	private static Node transformSimulink(String filepath, String fqn) {
-		Simulink2Graph s2g = new Simulink2Graph(filepath, fqn);
+	private static Node transformSimulink(PrintStream logger, String filepath, String fqn) {
+		Simulink2Graph s2g = new Simulink2Graph(logger, filepath, fqn);
 		Node toReturn = s2g.doTransform();
 //		logger.println("transformed simulink: " + toReturn.name + ":" + toReturn.type + "-(" + toReturn.optional + ")");
 //		logger.println(toReturn.toString());

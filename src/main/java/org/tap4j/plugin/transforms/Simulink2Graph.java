@@ -2,6 +2,7 @@ package org.tap4j.plugin.transforms;
 
 import com.google.common.base.Objects;
 import java.io.File;
+import java.io.PrintStream;
 import org.conqat.lib.commons.collections.UnmodifiableCollection;
 import org.conqat.lib.commons.logging.SimpleLogger;
 import org.conqat.lib.simulink.builder.SimulinkModelBuilder;
@@ -17,7 +18,10 @@ public class Simulink2Graph implements Lang2Graph {
   
   private String fqn;
   
-  public Simulink2Graph(final String filepath, final String fqn) {
+  private PrintStream logger;
+  
+  public Simulink2Graph(final PrintStream logger, final String filepath, final String fqn) {
+    this.logger = logger;
     this.filePath = filepath;
     this.fqn = fqn;
   }
@@ -51,28 +55,50 @@ public class Simulink2Graph implements Lang2Graph {
   }
   
   public Node getTreeFromTopBlock(final UnmodifiableCollection<SimulinkBlock> subblocks, final String prefix) {
-    Node _xifexpression = null;
+    int _size = subblocks.size();
+    String _plus = ((("getTreeFromTopBlock " + prefix) + " sbs lenght: ") + Integer.valueOf(_size));
+    this.logger.println(_plus);
     if (((subblocks != null) && (subblocks.size() > 0))) {
       for (final SimulinkBlock b : subblocks) {
-        String _name = b.getName();
-        String _plus = ((prefix + "/") + _name);
-        boolean _equals = Objects.equal(_plus, this.fqn);
-        if (_equals) {
-          return this.getTree(b, prefix);
-        } else {
-          UnmodifiableCollection<SimulinkBlock> _subBlocks = b.getSubBlocks();
+        {
+          String _name = b.getName();
+          String _plus_1 = ("checking for: " + _name);
+          this.logger.println(_plus_1);
           String _name_1 = b.getName();
-          String _plus_1 = ((prefix + "/") + _name_1);
-          Node n = this.getTreeFromTopBlock(_subBlocks, _plus_1);
-          if ((n != null)) {
-            return n;
+          String _plus_2 = ((prefix + "/") + _name_1);
+          String _fix = this.fix(_plus_2);
+          boolean _equals = Objects.equal(_fix, this.fqn);
+          if (_equals) {
+            this.logger.println("found the topBlock!");
+            return this.getTree(b, prefix);
+          } else {
+            String _name_2 = b.getName();
+            String _plus_3 = ((prefix + "/") + _name_2);
+            String _plus_4 = (_plus_3 + "!==");
+            String _plus_5 = (_plus_4 + this.fqn);
+            this.logger.println(_plus_5);
+            this.logger.println("getting tree for subBlock");
+            UnmodifiableCollection<SimulinkBlock> _subBlocks = b.getSubBlocks();
+            String _name_3 = b.getName();
+            String _plus_6 = ((prefix + "/") + _name_3);
+            Node n = this.getTreeFromTopBlock(_subBlocks, _plus_6);
+            if ((n != null)) {
+              this.logger.println("tree from subBlock is not null, found the correct top block!");
+              return n;
+            } else {
+              this.logger.println("tree from subBlock is null");
+            }
           }
         }
       }
+      return null;
     } else {
       return null;
     }
-    return _xifexpression;
+  }
+  
+  public String fix(final String toFix) {
+    return toFix.replace(" ", "").replace("\n", "").replace("\r", "");
   }
   
   public Node getTree(final SimulinkBlock block, final String prefix) {
