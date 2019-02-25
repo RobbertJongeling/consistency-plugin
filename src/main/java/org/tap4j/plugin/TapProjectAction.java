@@ -550,8 +550,12 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			case "LOOSE":
 				this.strictness = CheckStrictness.LOOSE;
 				break;
+			case "TYPE":
+				this.strictness = CheckStrictness.TYPE;
+				break;
 			case "STRICT":
 				this.strictness = CheckStrictness.STRICT;
+				break;
 			}
 			
 			this.mute = mute;
@@ -657,11 +661,19 @@ public class TapProjectAction implements Action, Describable<TapProjectAction> {
 			}
 
 			public ListBoxModel doFillStrictnessItems() {
-				return new ListBoxModel().add("LOOSE").add("STRICT");
+				ListBoxModel toReturn = new ListBoxModel();
+				for(CheckStrictness cs : CheckStrictness.values()) {
+					toReturn.add(cs.name());
+				}
+				return toReturn;
 			}
 			
 			public ListBoxModel doFillChecktypeItems() {
-				return new ListBoxModel().add("REFINEMENT").add("EQUIVALENCE");
+				ListBoxModel toReturn = new ListBoxModel();
+				for(CheckType ct : CheckType.values()) {
+					toReturn.add(ct.name());
+				}
+				return toReturn;
 			}
 			
 			//TODO techical debt. Fix ugly code duplication and hardcoded file names

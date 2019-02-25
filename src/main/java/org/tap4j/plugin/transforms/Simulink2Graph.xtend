@@ -73,7 +73,8 @@ class Simulink2Graph implements Lang2Graph {
 	def Node getTree(SimulinkBlock block, String prefix) {
 		var String name = prefix + "/" + block.name
 //		var Node toReturn = new Node(block.type, name)
-		var Node toReturn = new Node(block.type, name, block.name)
+		var String type = if (block.type.endsWith("port")) "Port" else block.type
+		var Node toReturn = new Node(type, name, block.name)
 
 //		for (ip : block.inPorts) {
 //			toReturn.addChild(new Node("inport", prefix + "/" + ip.index))

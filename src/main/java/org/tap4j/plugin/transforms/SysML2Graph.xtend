@@ -112,7 +112,7 @@ class SysML2Graph implements Lang2Graph {
 				for (clazz : model.allOwnedElements.filter(org.eclipse.uml2.uml.Class)) {
 					if (getFQN(clazz) == fqn) {
 						// TODO call this rootblock? or something like rootclass
-						toReturn = new Node("Rootblock", clazz.name, clazz.name)
+						toReturn = new Node("SubSystem", clazz.name, clazz.name)
 
 						// serialize containing classes
 						for (c : clazz.ownedElements.filter(org.eclipse.uml2.uml.Class)) {

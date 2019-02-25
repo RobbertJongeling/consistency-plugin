@@ -68,14 +68,14 @@ public class ConsistencyChecksRunner {
 			logger.println("Running transformations.");
 			Node treeA = GraphTransformer.transform(logger, workspace, cre.getA());
 			logger.println("done transforming: " + cre.getA().getFile());
-			if(treeA != null) {				
-				logger.println(treeA.toGraphviz());
-			}
+//			if(treeA != null) {				
+//				logger.println(treeA.toGraphviz());
+//			}
 			Node treeB = GraphTransformer.transform(logger, workspace, cre.getB());
 			logger.println("done transforming: " + cre.getB().getFile());
-			if(treeB != null) {	
-				logger.println(treeB.toGraphviz());
-			}
+//			if(treeB != null) {	
+//				logger.println(treeB.toGraphviz());
+//			}
 			logger.println("Completed transformations, running comparisons");			
 						
 			CheckResult thisresult = GraphComparer.doCompare(logger, treeA, treeB, cre.getChecktype(), cre.getStrictness());

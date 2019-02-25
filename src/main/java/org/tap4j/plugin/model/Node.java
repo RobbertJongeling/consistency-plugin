@@ -154,4 +154,27 @@ public class Node implements Comparable<Node> {
 			
 			return toReturn;
 		}
+		
+		//not absolute paths, but types starting from this node
+		public List<String> toLeafTypeList() {
+			List<String> toReturn = new LinkedList<>();
+			toReturn.add(type);
+			
+			for(Node c : children) {
+				toReturn.addAll(c.toLeafTypeList(type));
+			}
+			
+			return toReturn;
+		}
+		
+		private List<String> toLeafTypeList(String prefix) {
+			List<String> toReturn = new LinkedList<>();
+			String newPrefix = prefix + "/" + type;
+			toReturn.add(newPrefix);
+			for(Node c : children) {
+				toReturn.addAll(c.toLeafFQNList(newPrefix));
+			}
+			
+			return toReturn;
+		}
 }

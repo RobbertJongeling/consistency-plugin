@@ -30,6 +30,8 @@ public class GraphComparer {
 		switch (cs) {
 		case STRICT:
 			return GraphComparer.doCompareStrictEquivalence(logger, a, b);
+		case TYPE:
+			return GraphComparer.doCompareTypeEquivalence(logger, a, b);
 		case LOOSE:
 			return GraphComparer.doCompareLooseEquivalence(logger, a, b);
 		default:
@@ -41,6 +43,8 @@ public class GraphComparer {
 		switch (cs) {
 		case STRICT:
 			return GraphComparer.doCompareStrictRefinement(logger, a, b);
+		case TYPE:
+			return GraphComparer.doCompareTypeRefinement(logger, a, b);
 		case LOOSE:
 			return GraphComparer.doCompareLooseRefinement(logger, a, b);
 		default:
@@ -74,7 +78,37 @@ public class GraphComparer {
 				return new CheckResult(CheckResultEnum.PASS, "Node: " + a.fqn + " is strictly equivalent to Node: " + b.fqn);
 			}
 		}		
-	}	
+	}
+	
+	/**
+	 * a and b are strictly equivalent iff their names are equal and they have equivalent children
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	private static CheckResult doCompareTypeEquivalence(PrintStream logger, Node a, Node b) {
+		if(!a.type.equals(b.type)) {
+			return new CheckResult(CheckResultEnum.FAIL, a.fqn + "(" + a.type + ") has different type than: " + b.fqn + "(" + b.type + ")");
+		} else {
+			List<String> leafTypesA = a.toLeafTypeList();
+			List<String> leafTypesB = b.toLeafTypeList();
+			
+			logger.println("leaf Types tree A:");
+			for(String s : leafTypesA) {
+				logger.println(s);
+			}
+			logger.println("leaf Types tree B:");
+			for(String s : leafTypesB) {
+				logger.println(s);
+			}
+			
+			if(!(leafTypesA.containsAll(leafTypesB) && leafTypesB.containsAll(leafTypesB))) {
+				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " is not type equivalent to Node: " + b.fqn);
+			} else {
+				return new CheckResult(CheckResultEnum.PASS, "Node: " + a.fqn + " is tye equivalent to Node: " + b.fqn);			
+			}
+		}
+	}
 
 	//the idea is that we transform the tree with root a into a list of numbers, 
 	// each number consisting of a single digit for each level in the tree denoting the number of children at that level.
@@ -127,6 +161,14 @@ public class GraphComparer {
 				return new CheckResult(CheckResultEnum.PASS, "Node: " + a.fqn + " strictly refines Node: " + b.fqn);			
 			}
 		}	
+	}
+	
+	// the idea here is to get the fqn of each leaf, then check if a contains all of b.
+	// similar to the compare loose refinement, and less precise in error reporting than strict equivalence 
+	// (which could have been done in the same way but didn't to enhance error reporting)
+	private static CheckResult doCompareTypeRefinement(PrintStream logger, Node a, Node b) {
+		//TODO implement
+		return new CheckResult(CheckResultEnum.PASS, "Stub");
 	}
 	
 	//if a refines b, then a should contain at least all children of b. 

@@ -93,7 +93,7 @@ public class SysML2Graph implements Lang2Graph {
           if (_equals_1) {
             String _name_2 = clazz.getName();
             String _name_3 = clazz.getName();
-            Node _node_1 = new Node("Rootblock", _name_2, _name_3);
+            Node _node_1 = new Node("SubSystem", _name_2, _name_3);
             toReturn = _node_1;
             Iterable<org.eclipse.uml2.uml.Class> _filter_5 = Iterables.<org.eclipse.uml2.uml.Class>filter(clazz.getOwnedElements(), org.eclipse.uml2.uml.Class.class);
             for (final org.eclipse.uml2.uml.Class c_1 : _filter_5) {
