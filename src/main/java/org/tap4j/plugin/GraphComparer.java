@@ -111,7 +111,9 @@ public class GraphComparer {
 				logger.println(s);
 			}
 			
-			if(!((leafTypesA.size() == leafTypesB.size()) && leafTypesA.containsAll(leafTypesB) && leafTypesB.containsAll(leafTypesB))) {
+			Collections.sort(leafTypesA);
+			Collections.sort(leafTypesB);
+			if(!(leafTypesA.equals(leafTypesB))) {
 				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " is not type equivalent to Node: " + b.fqn + " see Console Output for more details");
 			} else {
 				return new CheckResult(CheckResultEnum.PASS, "Node: " + a.fqn + " is tye equivalent to Node: " + b.fqn);			
@@ -138,8 +140,9 @@ public class GraphComparer {
 				logger.println(s);
 			}
 			
-			//only contains is not enough, we should also count
-			if(!((nrChildrenTreeA.size() == nrChildrenTreeB.size()) && nrChildrenTreeA.containsAll(nrChildrenTreeB) && nrChildrenTreeB.containsAll(nrChildrenTreeA))) {
+			Collections.sort(nrChildrenTreeA);
+			Collections.sort(nrChildrenTreeB);
+			if(!(nrChildrenTreeA.equals(nrChildrenTreeB))) {
 				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " and Node: " + b.fqn + " are not loosely equivalent."  + " See Console Output for more details");
 			}
 		}
