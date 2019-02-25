@@ -79,7 +79,7 @@ class SysML2Graph implements Lang2Graph {
 
 
 		for (model : resource.contents.filter(org.eclipse.uml2.uml.Model)) {
-			if (fqn =="" || model.name == fqn) { // == maps to Object.equals in Xtend //FOR TESTING, ALWAYS MATCH MODEL TOTO FIX
+			if (fqn =="" || model.name == fqn) { // == maps to Object.equals in Xtend
 //				logger.println("model " + model.name + "; applied stereotypes: " + model.appliedStereotypes.toString)
 //				logger.println("model " + model.name + "; applicable stereotypes: " +
 //					model.allApplicableStereotypes.toString)
@@ -147,7 +147,7 @@ class SysML2Graph implements Lang2Graph {
 	 */
 	def Node getTree(org.eclipse.uml2.uml.Model model) {
 		val name = model.name
-		var Node toReturn = new Node("Rootblock", name, model.name)
+		var Node toReturn = new Node("Model", name, model.name)
 
 		for (p : model.ownedElements.filter(org.eclipse.uml2.uml.Package)) {
 			toReturn.addChild(getTree(p, name))

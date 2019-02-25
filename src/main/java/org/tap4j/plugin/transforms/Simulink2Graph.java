@@ -43,7 +43,7 @@ public class Simulink2Graph implements Lang2Graph {
     if ((Objects.equal(this.fqn, "") || Objects.equal(model.getName(), this.fqn))) {
       String _name = model.getName();
       String _name_1 = model.getName();
-      Node root = new Node("model", _name, _name_1, "opt");
+      Node root = new Node("Model", _name, _name_1, "opt");
       UnmodifiableCollection<SimulinkBlock> _subBlocks = model.getSubBlocks();
       for (final SimulinkBlock block : _subBlocks) {
         root.addChild(this.getTree(block, model.getName()));

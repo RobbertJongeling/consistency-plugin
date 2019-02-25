@@ -130,7 +130,7 @@ public class SysML2Graph implements Lang2Graph {
   public Node getTree(final Model model) {
     final String name = model.getName();
     String _name = model.getName();
-    Node toReturn = new Node("Rootblock", name, _name);
+    Node toReturn = new Node("Model", name, _name);
     Iterable<org.eclipse.uml2.uml.Package> _filter = Iterables.<org.eclipse.uml2.uml.Package>filter(model.getOwnedElements(), org.eclipse.uml2.uml.Package.class);
     for (final org.eclipse.uml2.uml.Package p : _filter) {
       toReturn.addChild(this.getTree(p, name));

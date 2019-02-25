@@ -172,7 +172,7 @@ public class Node implements Comparable<Node> {
 			String newPrefix = prefix + "/" + type;
 			toReturn.add(newPrefix);
 			for(Node c : children) {
-				toReturn.addAll(c.toLeafFQNList(newPrefix));
+				toReturn.addAll(c.toLeafTypeList(newPrefix));
 			}
 			
 			return toReturn;

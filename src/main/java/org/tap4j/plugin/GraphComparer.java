@@ -66,6 +66,15 @@ public class GraphComparer {
 			Collections.sort(a.children);
 			Collections.sort(b.children);
 			
+			logger.println("Children tree A:");
+			for(Node n : a.children) {
+				logger.println(n.fqn);
+			}
+			logger.println("Children tree B:");
+			for(Node n : b.children) {
+				logger.println(n.fqn);
+			}
+			
 			if(a.children.size() != b.children.size()) {
 				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " and Node: " + b.fqn + " have unequal amount of children");
 			} else {
@@ -102,8 +111,8 @@ public class GraphComparer {
 				logger.println(s);
 			}
 			
-			if(!(leafTypesA.containsAll(leafTypesB) && leafTypesB.containsAll(leafTypesB))) {
-				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " is not type equivalent to Node: " + b.fqn);
+			if(!((leafTypesA.size() == leafTypesB.size()) && leafTypesA.containsAll(leafTypesB) && leafTypesB.containsAll(leafTypesB))) {
+				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " is not type equivalent to Node: " + b.fqn + " see Console Output for more details");
 			} else {
 				return new CheckResult(CheckResultEnum.PASS, "Node: " + a.fqn + " is tye equivalent to Node: " + b.fqn);			
 			}
@@ -120,17 +129,18 @@ public class GraphComparer {
 			List<String> nrChildrenTreeA = a.toNumberChildrenList();
 			List<String> nrChildrenTreeB = b.toNumberChildrenList();
 			
-//			logger.println("nr children tree A:");
-//			for(String s : nrChildrenTreeA) {
-//				logger.println(s);
-//			}
-//			logger.println("nr children tree B:");
-//			for(String s : nrChildrenTreeB) {
-//				logger.println(s);
-//			}
+			logger.println("nr children tree A:");
+			for(String s : nrChildrenTreeA) {
+				logger.println(s);
+			}
+			logger.println("nr children tree B:");
+			for(String s : nrChildrenTreeB) {
+				logger.println(s);
+			}
 			
-			if(!(nrChildrenTreeA.containsAll(nrChildrenTreeB) && nrChildrenTreeB.containsAll(nrChildrenTreeA))) {
-				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " and Node: " + b.fqn + " are not loosely equivalent.");
+			//only contains is not enough, we should also count
+			if(!((nrChildrenTreeA.size() == nrChildrenTreeB.size()) && nrChildrenTreeA.containsAll(nrChildrenTreeB) && nrChildrenTreeB.containsAll(nrChildrenTreeA))) {
+				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " and Node: " + b.fqn + " are not loosely equivalent."  + " See Console Output for more details");
 			}
 		}
 		return new CheckResult(CheckResultEnum.PASS, "Node: " + a.fqn + " and Node: " + b.fqn + " are loosely equivalent.");
@@ -146,17 +156,17 @@ public class GraphComparer {
 			List<String> leafFqnsA = a.toLeafFQNList();
 			List<String> leafFqnsB = b.toLeafFQNList();
 			
-//			logger.println("leaf FQNs tree A:");
-//			for(String s : leafFqnsA) {
-//				logger.println(s);
-//			}
-//			logger.println("leaf FQNs tree B:");
-//			for(String s : leafFqnsB) {
-//				logger.println(s);
-//			}
+			logger.println("leaf FQNs tree A:");
+			for(String s : leafFqnsA) {
+				logger.println(s);
+			}
+			logger.println("leaf FQNs tree B:");
+			for(String s : leafFqnsB) {
+				logger.println(s);
+			}
 			
 			if(!(leafFqnsA.containsAll(leafFqnsB))) {
-				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " does not strictly refine Node: " + b.fqn);
+				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " does not strictly refine Node: " + b.fqn + " see Console Output for more details");
 			} else {
 				return new CheckResult(CheckResultEnum.PASS, "Node: " + a.fqn + " strictly refines Node: " + b.fqn);			
 			}
@@ -167,8 +177,28 @@ public class GraphComparer {
 	// similar to the compare loose refinement, and less precise in error reporting than strict equivalence 
 	// (which could have been done in the same way but didn't to enhance error reporting)
 	private static CheckResult doCompareTypeRefinement(PrintStream logger, Node a, Node b) {
-		//TODO implement
-		return new CheckResult(CheckResultEnum.PASS, "Stub");
+		if(!a.type.equals(b.type)) {
+			return new CheckResult(CheckResultEnum.FAIL, a.fqn + "(" + a.type + ") has different type than: " + b.fqn + "(" + b.type + ")");
+		} else {
+			List<String> leafTypesA = a.toLeafTypeList();
+			List<String> leafTypesB = b.toLeafTypeList();
+			
+			logger.println("leaf Types tree A:");
+			for(String s : leafTypesA) {
+				logger.println(s);
+			}
+			logger.println("leaf Types tree B:");
+			for(String s : leafTypesB) {
+				logger.println(s);
+			}
+			
+			//only contains is not enough, we should also count 
+			if(!(leafTypesA.size() >= leafTypesB.size() && leafTypesA.containsAll(leafTypesB))) {
+				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " is not a type refinement of Node: " + b.fqn + " see Console Output for more details");
+			} else {
+				return new CheckResult(CheckResultEnum.PASS, "Node: " + a.fqn + " is a type refinement of Node: " + b.fqn);			
+			}
+		}
 	}
 	
 	//if a refines b, then a should contain at least all children of b. 

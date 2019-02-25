@@ -37,7 +37,7 @@ class Simulink2Graph implements Lang2Graph {
 	
 	def Node getTree(SimulinkModel model) {
 		if(fqn == "" || model.name == fqn) {		
-			var Node root = new Node("model", model.name, model.name, "opt")
+			var Node root = new Node("Model", model.name, model.name, "opt")
 			for (SimulinkBlock block : model.subBlocks) {
 				root.addChild(getTree(block, model.name))
 			}
