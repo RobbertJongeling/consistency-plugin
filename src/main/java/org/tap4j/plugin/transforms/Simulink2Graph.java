@@ -46,12 +46,19 @@ public class Simulink2Graph implements Lang2Graph {
       Node root = new Node("Model", _name, _name_1, "opt");
       UnmodifiableCollection<SimulinkBlock> _subBlocks = model.getSubBlocks();
       for (final SimulinkBlock block : _subBlocks) {
-        root.addChild(this.getTree(block, model.getName()));
+        boolean _interestingType = this.interestingType(block.getType());
+        if (_interestingType) {
+          root.addChild(this.getTree(block, model.getName()));
+        }
       }
       return root;
     } else {
       return this.getTreeFromTopBlock(model.getSubBlocks(), model.getName());
     }
+  }
+  
+  public boolean interestingType(final String type) {
+    return (Objects.equal(type, "SubSystem") || type.endsWith("port"));
   }
   
   public Node getTreeFromTopBlock(final UnmodifiableCollection<SimulinkBlock> subblocks, final String prefix) {
@@ -98,7 +105,10 @@ public class Simulink2Graph implements Lang2Graph {
     Node toReturn = new Node(type, name, _name_1);
     UnmodifiableCollection<SimulinkBlock> _subBlocks = block.getSubBlocks();
     for (final SimulinkBlock b : _subBlocks) {
-      toReturn.addChild(this.getTree(b, name));
+      boolean _interestingType = this.interestingType(b.getType());
+      if (_interestingType) {
+        toReturn.addChild(this.getTree(b, name));
+      }
     }
     return toReturn;
   }

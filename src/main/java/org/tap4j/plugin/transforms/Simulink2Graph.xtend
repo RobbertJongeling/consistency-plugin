@@ -39,12 +39,18 @@ class Simulink2Graph implements Lang2Graph {
 		if(fqn == "" || model.name == fqn) {		
 			var Node root = new Node("Model", model.name, model.name, "opt")
 			for (SimulinkBlock block : model.subBlocks) {
-				root.addChild(getTree(block, model.name))
+				if(interestingType(block.type)) {
+					root.addChild(getTree(block, model.name))				
+				}
 			}
 			return root
 		} else {
 			return getTreeFromTopBlock(model.subBlocks, model.name)
 		}
+	}
+	
+	def interestingType(String type) {
+		return type == "SubSystem" || type.endsWith("port")
 	}
 	
 	def Node getTreeFromTopBlock(UnmodifiableCollection<SimulinkBlock> subblocks, String prefix) {
@@ -85,7 +91,9 @@ class Simulink2Graph implements Lang2Graph {
 //		}
 //		
 		for (b : block.subBlocks) {
-			toReturn.addChild(getTree(b, name))
+			if(interestingType(b.type)) {
+				toReturn.addChild(getTree(b, name))			
+			}
 		}
 		
 		return toReturn

@@ -173,9 +173,6 @@ public class ConsistencyChecker extends Recorder implements MatrixAggregatable, 
 
 			logger.println("Consistency Checking: START");
 
-			// Stub:
-			logger.println("Placeholder, for now we only copy the config");
-
 			// copying the config from last build (or default place) to new build
 			// oldPath is previous build, or, if not exists, the default
 			FilePath oldPath = null;
