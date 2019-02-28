@@ -169,7 +169,8 @@ public class GraphComparer {
 			}
 			
 			if(!(leafFqnsA.containsAll(leafFqnsB))) {
-				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " does not strictly refine Node: " + b.fqn + " see Console Output for more details");
+				leafFqnsB.removeAll(leafFqnsA);
+				return new CheckResult(CheckResultEnum.FAIL, "Node: " + a.fqn + " does not strictly refine Node: " + b.fqn +". Missing: "+ leafFqnsB.toString());
 			} else {
 				return new CheckResult(CheckResultEnum.PASS, "Node: " + a.fqn + " strictly refines Node: " + b.fqn);			
 			}
